@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@headlessui/vue": "^1.7.16",
     "vue": "^3.3.11",
     "vue-router": "^4.2.5"
   },
@@ -16,6 +17,8 @@
     "@vitejs/plugin-vue": "^4.5.2",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.32",
+    "prettier": "^3.1.1",
+    "prettier-plugin-tailwindcss": "^0.5.9",
     "tailwindcss": "^3.3.6",
     "vite": "^5.0.8"
   }
