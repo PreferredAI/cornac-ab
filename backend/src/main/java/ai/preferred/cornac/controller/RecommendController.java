@@ -27,9 +27,8 @@ public class RecommendController {
 
     @RequestMapping(value = "/instance", method = RequestMethod.POST)
     public CornacInstanceDto createCornacInstance(
-            @RequestParam(name = "name", defaultValue = "model") String name,
-            @RequestParam(name = "port", defaultValue = "5000") int port) {
-        return recommendService.createCornacInstance(name, port);
+            @RequestParam(name = "name", defaultValue = "model") String name) {
+        return recommendService.createCornacInstance(name);
     }
 
 }
