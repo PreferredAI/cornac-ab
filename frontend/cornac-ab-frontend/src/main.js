@@ -7,14 +7,15 @@ import Welcome from './views/Welcome.vue'
 import Setup from './views/Setup.vue'
 import HelloWorld from './views/HelloWorld.vue'
 import Dashboard from './views/Dashboard.vue'
+import Evaluation from './views/Evaluation.vue'
 
 const router = createRouter({
     history: createWebHistory(),
     routes: [
         { path: '/', component: Welcome },
         { path: '/setup', component: Setup },
-        { path: '/hello', component: HelloWorld },
         { path: '/dashboard', component: Dashboard },
+        { path: '/evaluation', component: Evaluation },
     ]
 })
 

@@ -1,6 +1,10 @@
 <template>
     <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-bold mb-4">Setup Page</h1>
+        <header class="bg-white shadow">
+            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+            <h1 class="text-3xl font-bold tracking-tight text-gray-900">Environment Setup</h1>
+            </div>
+        </header>
 
         <div class="mb-4">
             <label for="name" class="block font-bold mb-2">Name:</label>
@@ -8,6 +12,9 @@
         </div>
 
         <div class="mb-4">
+            <label for="files" class="block font-bold mb-2">Please upload the Cornac trained model</label>
+            <label for="files" class="font-bold mb-2">The model should include a:
+                - .pkl file - .pkl.trainset file</label>
             <h2 class="text-lg font-bold mb-2">Files:</h2>
             <ul>
                 <li v-for="(file, index) in files" :key="index" class="mb-2">
