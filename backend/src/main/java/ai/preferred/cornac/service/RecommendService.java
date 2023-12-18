@@ -7,12 +7,15 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.ErrorResponseException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -27,29 +30,49 @@ public class RecommendService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public CornacInstanceDto createCornacInstance(String name, int port) {
+    public CornacInstanceDto createCornacInstance(String name) {
+        Integer port = 5000;
+
+        try {
+            ServerSocket serverSocket = new ServerSocket(0);
+            port = serverSocket.getLocalPort();
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         boolean isWindows = System.getProperty("os.name")
                 .toLowerCase()
                 .startsWith("windows");
 
         ProcessBuilder builder = new ProcessBuilder();
+
         if (isWindows) {
             builder.command("cmd.exe", "cornac-run.cmd");
         } else {
-            builder.command("sh", "cornac-run.sh");
+            builder.command("sh", "cornac-run.sh", port.toString());
         }
 
         try {
             Process process = builder.start();
             addCornacInstance(name, port, process);
 
-            System.out.println("waiting");
-            System.out.println(process.waitFor(10, TimeUnit.SECONDS));
-            return new CornacInstanceDto(name, port, "created");
-//            List<String> outputs = readOutput(process.getInputStream());
-//            List<String> errors = readOutput(process.getErrorStream());
-//            outputs.forEach(output -> LOGGER.info("cornac instance: " + output));
-//            errors.forEach(error -> LOGGER.error("cornac instance: " + error));
+            LOGGER.info("Starting service at port: {}", port);
+
+            if (process.waitFor(10, TimeUnit.SECONDS)){
+                LOGGER.info("Service failed to start.");
+                List<String> errors = readOutput(process.getErrorStream());
+                errors.forEach(error -> LOGGER.error("error output> " + error));
+//                List<String> outputs = readOutput(process.getInputStream());
+//                outputs.forEach(output -> LOGGER.info("output> " + output));
+
+                throw new ErrorResponseException(HttpStatus.BAD_REQUEST,
+                        new RuntimeException("Unable to start service. Please try again.")
+                );
+            } else {
+                LOGGER.info("Service started at port: {}", port);
+                return new CornacInstanceDto(name, port, "created");
+            }
 
         } catch (IOException e) {
             throw new RuntimeException(e);
