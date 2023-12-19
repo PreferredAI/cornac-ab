@@ -48,7 +48,9 @@ public class RecommendService {
         ProcessBuilder builder = new ProcessBuilder();
 
         if (isWindows) {
-            builder.command("cmd.exe", "cornac-run.cmd");
+//            builder.command("cmd.exe", "cornac-run.cmd");
+            System.out.println("Windows is currently not supported. Please use the docker version. More information in readme.");
+            System.exit(0);
         } else {
             builder.command("sh", "cornac-run.sh", port.toString());
         }
