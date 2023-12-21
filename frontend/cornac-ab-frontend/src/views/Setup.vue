@@ -13,7 +13,7 @@
 
                 <div class="lg:grid lg:grid-cols-2 lg:gap-x-6">
                     <div v-for="index in numModels" :key="index" class="mt-10 grid grid-cols-1">
-                        <div class="mt-2 justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+                        <div class="transition mt-2 justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
                             <div class="col-span-4 mt-4">
                                 <label for="model-name" class="block text-sm font-medium leading-6 text-gray-900">Model name</label>
                                 <div class="mt-2">
@@ -37,6 +37,19 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div class="mt-10 grid grid-cols-1">
+                        <button @click="addMoreModel" class="mt-2 justify-center bg-indigo-50 rounded-lg border border-dashed fill border-gray-900/25 px-6 py-10">
+
+                                <div class="text-center">
+                                    <svg class="mx-auto h-12 w-12 text-indigo-600" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                                    </svg>
+                                    <PhotoIcon class="mx-auto h-12 w-12 text-gray-300" aria-hidden="true" />
+                                    <p class="text-sm leading-5 font-semibold text-indigo-600">Add more models</p>
+                                </div>
+
+                            </button>
                     </div>
                 </div>
                 <button @click="addMoreModel" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md">Add more</button>
