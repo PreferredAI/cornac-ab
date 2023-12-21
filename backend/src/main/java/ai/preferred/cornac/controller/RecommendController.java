@@ -1,16 +1,18 @@
 package ai.preferred.cornac.controller;
 
 import ai.preferred.cornac.dto.CornacInstanceDto;
+import ai.preferred.cornac.dto.RecommendationDto;
 import ai.preferred.cornac.service.RecommendService;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.repository.core.support.FragmentNotImplementedException;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@CrossOrigin
 @RequestMapping(value = "/recommend")
 public class RecommendController {
 
@@ -27,8 +29,15 @@ public class RecommendController {
 
     @RequestMapping(value = "/instance", method = RequestMethod.POST)
     public CornacInstanceDto createCornacInstance(
-            @RequestParam(name = "name", defaultValue = "model") String name) {
-        return recommendService.createCornacInstance(name);
+            @RequestParam(name = "name", defaultValue = "model") String name,
+            @RequestParam(name = "modelClass") String modelClass,
+            @RequestParam("file") MultipartFile file) {
+        return recommendService.createCornacInstance(name, modelClass, file);
+    }
+
+    @RequestMapping(value = "/", method = RequestMethod.GET)
+    public RecommendationDto getRecommendations(){
+        return null;
     }
 
 }

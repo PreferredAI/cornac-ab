@@ -2,6 +2,7 @@ package ai.preferred.cornac.service;
 
 import ai.preferred.cornac.dto.CornacInstanceDto;
 import ai.preferred.cornac.entity.CornacInstance;
+import ai.preferred.cornac.util.FileUtil;
 import jakarta.annotation.PreDestroy;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -10,12 +11,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.ErrorResponseException;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -30,7 +37,37 @@ public class RecommendService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public CornacInstanceDto createCornacInstance(String name) {
+    public CornacInstanceDto createCornacInstance(String name, String modelClass, MultipartFile file) {
+
+        boolean isWindows = System.getProperty("os.name")
+                .toLowerCase()
+                .startsWith("windows");
+
+        if (isWindows){
+            System.out.println("Windows is currently not supported. " +
+                    "Please use the docker version. More information in readme.");
+            System.exit(0);
+        }
+
+        if (!FileUtil.isFileExtension(file, ".zip")){
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "invalid file type attached. only '.zip' files are accepted."
+            );
+        }
+
+        storeFileInTemp(file, modelClass + "-" + name);
+        try {
+            FileUtil.unzipFile("uploads/" + modelClass + "-" + name + "/file.zip", "uploads/" + modelClass + "-" + name + "/output/", true);
+        } catch (IOException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Unable to unzip file. Please try again."
+            );
+        }
+
+        String modelFolder = "uploads/" + modelClass + "-" + name + "/output/";
+
         Integer port = 5000;
 
         try {
@@ -41,18 +78,14 @@ public class RecommendService {
             throw new RuntimeException(e);
         }
 
-        boolean isWindows = System.getProperty("os.name")
-                .toLowerCase()
-                .startsWith("windows");
+
 
         ProcessBuilder builder = new ProcessBuilder();
 
         if (isWindows) {
-//            builder.command("cmd.exe", "cornac-run.cmd");
-            System.out.println("Windows is currently not supported. Please use the docker version. More information in readme.");
-            System.exit(0);
+            builder.command("cmd.exe", "cornac-run.cmd");
         } else {
-            builder.command("sh", "cornac-run.sh", port.toString());
+            builder.command("sh", "cornac-run.sh", port.toString(), modelFolder, modelClass);
         }
 
         try {
@@ -136,6 +169,22 @@ public class RecommendService {
 
     public void addCornacInstance(String name, int port, Process process) {
         activeCornacInstances.add(new CornacInstance(name, port, process));
+    }
+
+    private void storeFileInTemp(MultipartFile file, String dirName) {
+        if (file.isEmpty()){
+            throw new RuntimeException("Empty file attached. Unable to store.");
+        }
+
+        Path uploadDir = Paths.get("uploads");
+
+        try (InputStream inputStream = file.getInputStream()) {
+            Files.createDirectories(uploadDir.resolve(dirName));
+            Files.copy(inputStream, uploadDir.resolve(dirName + "/file.zip"), StandardCopyOption.REPLACE_EXISTING);
+
+        } catch (IOException e){
+            throw new RuntimeException(e);
+        }
     }
 
     @PreDestroy
