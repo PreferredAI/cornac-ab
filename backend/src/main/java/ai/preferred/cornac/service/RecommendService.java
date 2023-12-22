@@ -1,7 +1,9 @@
 package ai.preferred.cornac.service;
 
 import ai.preferred.cornac.dto.CornacInstanceDto;
-import ai.preferred.cornac.entity.CornacInstance;
+import ai.preferred.cornac.dto.RecommendLogDto;
+import ai.preferred.cornac.entity.*;
+import ai.preferred.cornac.repository.RecommendLogRepository;
 import ai.preferred.cornac.util.FileUtil;
 import jakarta.annotation.PreDestroy;
 import org.modelmapper.ModelMapper;
@@ -12,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.BufferedReader;
@@ -23,8 +26,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -33,6 +36,12 @@ public class RecommendService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(RecommendService.class);
     private final List<CornacInstance> activeCornacInstances = new ArrayList<>();
+
+    @Autowired
+    private RecommendLogRepository recommendLogRepository;
+
+    @Autowired
+    private ExperimentService experimentService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -83,7 +92,8 @@ public class RecommendService {
         ProcessBuilder builder = new ProcessBuilder();
 
         if (isWindows) {
-            builder.command("cmd.exe", "cornac-run.cmd");
+            // windows cmd file is not yet included.
+            builder.command("cmd.exe", "cornac-run.cmd", port.toString(), modelFolder, modelClass);
         } else {
             builder.command("sh", "cornac-run.sh", port.toString(), modelFolder, modelClass);
         }
@@ -114,38 +124,6 @@ public class RecommendService {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
-//        try {
-//            ProcessBuilder builder = new ProcessBuilder();
-//            if (isWindows) {
-//                builder.command("cmd.exe", "/c", "dir");
-//            } else {
-//                builder.command("sh", "-c", "ls");
-//            }
-//            builder.directory(new File(System.getProperty("user.home")));
-//            Process process = builder.start();
-//            try {
-//                process.waitFor(100, TimeUnit.SECONDS);
-//            } catch (InterruptedException e) {
-//                throw new RuntimeException(e);
-//            }
-//
-//            BufferedReader stdInput = new BufferedReader(new InputStreamReader(
-//                    process.getInputStream())
-//            );
-//
-//            System.out.println("t");
-//
-//            String s = null;
-//            while ((s = stdInput.readLine()) != null) {
-//                System.out.println(s);
-//            }
-//
-////            List<String> results = readOutput(process.getInputStream());
-//            return null;
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
     }
 
     private List<String> readOutput(InputStream inputStream) throws IOException {
@@ -168,7 +146,10 @@ public class RecommendService {
     }
 
     public void addCornacInstance(String name, int port, Process process) {
-        activeCornacInstances.add(new CornacInstance(name, port, process));
+        WebClient webClient = WebClient.create(
+                String.format("http://localhost:%d/", port)
+        );
+        activeCornacInstances.add(new CornacInstance(name, port, process, webClient));
     }
 
     private void storeFileInTemp(MultipartFile file, String dirName) {
@@ -186,6 +167,72 @@ public class RecommendService {
             throw new RuntimeException(e);
         }
     }
+
+    public RecommendLogDto getRecommendations(String userId, String k){
+        int numInstances = activeCornacInstances.size();
+
+        Experiment experiment = experimentService.getCurrentExperiment();
+        ExperimentType experimentType = experiment.getType();
+
+        int userIdHash = Math.abs(userId.hashCode());
+
+        int chosenInstance;
+
+        switch (experimentType){
+            case TIME:
+                int hour = LocalDateTime.now().getHour();
+                int interval = hour % experiment.getTimeHoursSwitch();
+                chosenInstance = interval % numInstances;
+                break;
+            case USER:
+                // run a deterministic random operation.
+                // - This will give the same instance on every run for the same user.
+                Random rand = new Random(experiment.getUserSeed());
+                int randInt = rand.nextInt(userIdHash);
+                chosenInstance = randInt % numInstances;
+                break;
+            default:
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Invalid 'type': " +
+                        "Please indicate 'time' for time-sliced and 'user' for user-sliced A-B Testing.");
+        }
+
+        CornacInstance cornacInstance = activeCornacInstances.get(chosenInstance);
+        WebClient webClient = cornacInstance.getWebClient();
+        Recommendation recommendation = getApiRecommendation(webClient, userId, k);
+
+        // add recommendation to log
+        RecommendLog log = new RecommendLog(
+                null,
+                recommendation.getRecommendations(),
+                recommendation.getQuery(),
+                new ArrayList<>()
+        );
+
+        RecommendLog recommendLog = recommendLogRepository.save(log);
+        return convertToRecommendLogDto(recommendLog);
+    }
+
+    public Recommendation getApiRecommendation(WebClient webClient, String userId, String k) {
+
+
+        return webClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                    .path("recommend")
+                    .queryParam("uid", userId)
+                    .queryParamIfPresent("k", Optional.ofNullable(k))
+                    .build())
+                .retrieve()
+                .bodyToMono(Recommendation.class)
+                .block();
+    }
+
+    private RecommendLogDto convertToRecommendLogDto(RecommendLog recommendLog) {
+        return modelMapper.map(recommendLog, RecommendLogDto.class);
+    }
+
+
 
     @PreDestroy
     public void destroy(){

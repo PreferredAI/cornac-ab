@@ -1,8 +1,7 @@
 package ai.preferred.cornac.service;
 
-import ai.preferred.cornac.entity.Feedback;
-import ai.preferred.cornac.repository.OpensearchRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import ai.preferred.cornac.entity.RecommendLog;
+import ai.preferred.cornac.repository.RecommendLogRepository;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -10,13 +9,13 @@ import java.util.List;
 
 @Service
 public class FeedbackService {
-    private final OpensearchRepository feedbackRepository;
+    private final RecommendLogRepository feedbackRepository;
 
-    public FeedbackService(OpensearchRepository feedbackRepository) {
+    public FeedbackService(RecommendLogRepository feedbackRepository) {
         this.feedbackRepository = feedbackRepository;
     }
 
-    public List<Feedback> getFeedbacks(String userId, String itemId) {
+    public List<RecommendLog> getFeedbacks(String userId, String itemId) {
         return feedbackRepository.findAll(); //TODO: filter
     }
 
