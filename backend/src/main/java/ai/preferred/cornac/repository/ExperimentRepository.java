@@ -9,6 +9,6 @@ import java.util.List;
 public interface ExperimentRepository extends CrudRepository<Experiment, Long> {
     List<Experiment> findAll();
 
-    Experiment findFirstByStartDateTimeLessThanEqualAndEndDateTimeIsGreaterThanEqual(Date date1, Date date2);
+    Experiment findFirstByEndDateTimeIsNull();
 
 }

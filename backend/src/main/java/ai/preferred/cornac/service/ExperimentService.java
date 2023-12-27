@@ -4,6 +4,7 @@ import ai.preferred.cornac.entity.Experiment;
 import ai.preferred.cornac.entity.ExperimentStatus;
 import ai.preferred.cornac.entity.ExperimentType;
 import ai.preferred.cornac.repository.ExperimentRepository;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -31,12 +34,14 @@ public class ExperimentService {
     }
 
     public Experiment getCurrentExperiment(){
-        return experimentRepository.findFirstByStartDateTimeLessThanEqualAndEndDateTimeIsGreaterThanEqual(new Date(), new Date());
+        return experimentRepository.findFirstByEndDateTimeIsNull();
     }
 
-    public Experiment createNewExperiment(ExperimentType type, Date startDateTime, Date endDateTime, Long userSeed, Integer hoursSwitch){
+    public Experiment createNewExperiment(Long userSeed){
         ExperimentStatus experimentStatus = ExperimentStatus.RUNNING;
-        Experiment experiment = new Experiment(null, type, startDateTime, endDateTime, userSeed, hoursSwitch, experimentStatus);
+        Date date = new Date();
+        Timestamp startDateTime = new Timestamp(date.getTime());
+        Experiment experiment = new Experiment(null, startDateTime, null, userSeed, experimentStatus, new ArrayList<>());
         return experimentRepository.save(experiment);
     }
 }
