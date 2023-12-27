@@ -8,9 +8,6 @@
         <div class="mb-4">
             <button class="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md">Run Evaluation</button>
         </div>
-        <div class="mb-4">
-            <button class="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md">Test get instances</button>
-        </div>
         <div>
             comments: possible sections in this dashboard:
             - ability to control time frame of recommendations and feedback given by users
