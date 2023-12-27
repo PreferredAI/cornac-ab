@@ -7,62 +7,74 @@
         </header>
         <form>
             <div class="space-y-12">
-            <div class="border-b border-gray-900/10 pb-12 mt-12">
-                <h2 class="text-base font-semibold leading-7 text-gray-900">Model setup</h2>
-                <p class="mt-1 text-sm leading-6 text-gray-600">Add your trained models by zipping them up and uploading them here.</p>
+                <div class="border-b border-gray-900/10 pb-12 mt-12">
+                    <h2 class="text-base font-semibold leading-7 text-gray-900">Model setup</h2>
+                    <p class="mt-1 text-sm leading-6 text-gray-600">Add your trained models by zipping them up and uploading them here.</p>
 
-                <div class="lg:grid lg:grid-cols-2 lg:gap-x-6">
-                    <div v-for="index in numModels" :key="index" class="mt-10 grid grid-cols-1">
-                        <div class="transition mt-2 justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                            <div class="col-span-4 mt-4">
-                                <label for="model-name" class="block text-sm font-medium leading-6 text-gray-900">Model name</label>
-                                <div class="mt-2">
-                                    <input type="text" name="model-name" id="model-name" class="block w-full px-4 py-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="My model" />
-                                </div>
-                            </div>
-                            <div class="col-span-4 mt-4">
-                                <label for="cover-photo" class="block text-sm font-medium leading-6 text-gray-900">Model file</label>
-                                <div class="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                                <div class="text-center">
-                                    <PhotoIcon class="mx-auto h-12 w-12 text-gray-300" aria-hidden="true" />
-                                    <div class="mt-4 flex text-sm leading-6 text-gray-600">
-                                    <label for="file-upload" class="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500">
-                                        <span>Upload a file</span>
-                                        <input id="file-upload" name="file-upload" type="file" class="sr-only" />
-                                    </label>
-                                    <p class="pl-1">or drag and drop</p>
+                    <div class="lg:grid lg:grid-cols-2 lg:gap-x-6">
+                        <div v-for="(model, index) in models" :key="index" class="mt-10 grid grid-cols-1">
+                            <div class="transition mt-2 justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+                                <div class="col-span-4 mt-4">
+                                    <label for="model-name" class="block text-sm font-medium leading-6 text-gray-900">Model name</label>
+                                    <div class="mt-2">
+                                        <input type="text" name="model-name" id="model-name" class="block w-full px-4 py-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="My model" />
                                     </div>
-                                    <p class="text-xs leading-5 text-gray-600">ZIP, up to 10MB</p>
                                 </div>
+                                <div class="col-span-4 mt-4">
+                                    <label for="model-class" class="block text-sm font-medium leading-6 text-gray-900">Model class</label>
+                                    <div class="mt-2">
+                                        <div class="flex w-full rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
+                                            <span class="flex select-none items-center pl-3 text-gray-500 sm:text-sm">cornac.models.</span>
+                                            <input type="text" name="model-class" id="model-class" class="block flex-1 border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" placeholder="MF" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-span-4 mt-4">
+                                    <label for="model-file" class="block text-sm font-medium leading-6 text-gray-900">Model file</label>
+                                    <div class="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+                                    <div class="text-center">
+                                        <div class="mt-4 flex text-sm leading-6 text-gray-600">
+                                        <label for="file-upload" class="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500">
+                                            <span>Upload a file</span>
+                                            <input id="file-upload" name="file-upload" type="file" class="sr-only" />
+                                        </label>
+                                        <p class="pl-1">or drag and drop</p>
+                                        </div>
+                                        <p class="text-xs leading-5 text-gray-600">ZIP, up to 100MB</p>
+                                    </div>
+                                    </div>
+                                </div>
+                                <div v-if="index > 1" class="col-span-4 mt-8">
+                                    <div class="text-right">
+                                        <button @click="removeModel(index)" type="button" class="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto">Remove</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="mt-10 grid grid-cols-1">
-                        <button @click="addMoreModel" class="mt-2 justify-center bg-indigo-50 rounded-lg border border-dashed fill border-gray-900/25 px-6 py-10">
+                        <div class="mt-10 grid grid-cols-1">
+                            <button @click="addMoreModel" class="mt-2 justify-center bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-dashed fill border-gray-900/25 px-6 py-10">
 
-                                <div class="text-center">
-                                    <svg class="mx-auto h-12 w-12 text-indigo-600" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
-                                    </svg>
-                                    <PhotoIcon class="mx-auto h-12 w-12 text-gray-300" aria-hidden="true" />
-                                    <p class="text-sm leading-5 font-semibold text-indigo-600">Add more models</p>
-                                </div>
+                                    <div class="text-center">
+                                        <svg class="mx-auto h-12 w-12 text-indigo-600" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                                        </svg>
+                                        <PhotoIcon class="mx-auto h-12 w-12 text-gray-300" aria-hidden="true" />
+                                        <p class="text-sm leading-5 font-semibold text-indigo-600">Add more models</p>
+                                    </div>
 
-                            </button>
+                                </button>
+                        </div>
                     </div>
-                </div>
-                <button @click="addMoreModel" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md">Add more</button>
 
                 </div>
 
             </div>
-
+<!-- 
             <div class="border-b border-gray-900/10 pb-12 mt-4">
                 <h2 class="text-base font-semibold leading-7 text-gray-900">Experiment mode setup</h2>
                 <p class="mt-1 text-sm leading-6 text-gray-600">Set up how you would like to split users to receive models.</p>
                 Time, user, manual modes.
-            </div>
+            </div> -->
 
             <div class="mt-6 flex items-center justify-end gap-x-6">
             <!-- <button type="button" class="text-sm font-semibold leading-6 text-gray-900">Cancel</button> -->
@@ -70,7 +82,7 @@
             </div>
         </form>
 
-        <div class="mb-4">
+        <!-- <div class="mb-4">
             <label for="name" class="block font-bold mb-2">Name:</label>
             <input type="text" id="name" v-model="name" class="border border-gray-300 px-4 py-2 rounded-md w-full" />
         </div>
@@ -87,7 +99,7 @@
                 </li>
             </ul>
             <button @click="addFile" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md">Add File</button>
-        </div>
+        </div> -->
     </div>
 </template>
 
@@ -98,19 +110,33 @@ export default {
             name: '',
             files: [],
             numModels: 2,
+            models: [
+                {
+                    name: '',
+                    class: '',
+                    file: '',
+                },
+                {
+                    name: '',
+                    class: '',
+                    file: '',
+                }
+            ],
         };
     },
     methods: {
-        addFile() {
-            this.files.push({ name: '' });
-        },
-        removeFile(index) {
-            this.files.splice(index, 1);
-        },
         addMoreModel(e) {
-            this.numModels += 1;
+            this.models.push({
+                name: '',
+                class: '',
+                file: '',
+            });
             e.preventDefault();
         },
+        removeModel(index) {
+            this.models.splice(index, 1);
+            e.preventDefault();
+        }
     }
 };
 </script>
