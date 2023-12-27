@@ -4,6 +4,7 @@ import ai.preferred.cornac.dto.CornacInstanceDto;
 import ai.preferred.cornac.dto.RecommendLogDto;
 import ai.preferred.cornac.entity.*;
 import ai.preferred.cornac.repository.RecommendLogRepository;
+import ai.preferred.cornac.repository.UserAbAllocationRepository;
 import ai.preferred.cornac.util.FileUtil;
 import jakarta.annotation.PreDestroy;
 import org.modelmapper.ModelMapper;
@@ -39,6 +40,9 @@ public class RecommendService {
 
     @Autowired
     private RecommendLogRepository recommendLogRepository;
+
+    @Autowired
+    private UserAbAllocationRepository userAbAllocationRepository;
 
     @Autowired
     private ExperimentService experimentService;
@@ -168,34 +172,38 @@ public class RecommendService {
         }
     }
 
-    public RecommendLogDto getRecommendations(String userId, String k){
+    private Integer getAbInstanceGroup(Experiment experiment, String userId){
         int numInstances = activeCornacInstances.size();
 
-        Experiment experiment = experimentService.getCurrentExperiment();
-        ExperimentType experimentType = experiment.getType();
+        Integer experimentId = experiment.getId();
 
-        int userIdHash = Math.abs(userId.hashCode());
+        UserAbAllocation userAbAllocation = userAbAllocationRepository.findByExperimentIdAndUserId(experimentId, userId);
 
-        int chosenInstance;
-
-        switch (experimentType){
-            case TIME:
-                int hour = LocalDateTime.now().getHour();
-                int interval = hour % experiment.getTimeHoursSwitch();
-                chosenInstance = interval % numInstances;
-                break;
-            case USER:
-                // run a deterministic random operation.
-                // - This will give the same instance on every run for the same user.
-                Random rand = new Random(experiment.getUserSeed());
-                int randInt = rand.nextInt(userIdHash);
-                chosenInstance = randInt % numInstances;
-                break;
-            default:
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Invalid 'type': " +
-                        "Please indicate 'time' for time-sliced and 'user' for user-sliced A-B Testing.");
+        if (userAbAllocation == null) {
+            // allocate an ab-testing group
+            // - abGroup is a random number between 0 and numInstances
+            // - this is a deterministic random operation.
+            // - This will give the same instance on the same seed for the same user.
+            Random rand = new Random(experiment.getUserSeed());
+            int randInt = rand.nextInt(userId.hashCode());
+            int abGroup = randInt % numInstances;
+            userAbAllocationRepository.save(new UserAbAllocation(null, userId, abGroup, experiment));
+            return abGroup;
         }
+
+        return userAbAllocation.getAbGroup();
+    }
+
+    public RecommendLogDto getRecommendations(String userId, String k){
+        Experiment experiment = experimentService.getCurrentExperiment();
+
+        if (experiment == null){
+            throw new ErrorResponseException(HttpStatus.BAD_REQUEST,
+                    new RuntimeException("No experiment is currently running.")
+            );
+        }
+
+        Integer chosenInstance = getAbInstanceGroup(experiment, userId);
 
         CornacInstance cornacInstance = activeCornacInstances.get(chosenInstance);
         WebClient webClient = cornacInstance.getWebClient();
@@ -204,6 +212,7 @@ public class RecommendService {
         // add recommendation to log
         RecommendLog log = new RecommendLog(
                 null,
+                experiment.getId(),
                 recommendation.getRecommendations(),
                 recommendation.getQuery(),
                 new ArrayList<>()

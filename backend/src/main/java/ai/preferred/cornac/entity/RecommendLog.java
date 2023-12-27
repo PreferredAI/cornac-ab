@@ -17,6 +17,7 @@ import java.util.List;
 public class RecommendLog {
     @Id
     private String id;
+    private Integer experimentId;
 
     private List<String> recommendations;
     private RecommendationQuery query;

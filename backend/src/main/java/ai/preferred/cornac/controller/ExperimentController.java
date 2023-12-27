@@ -34,12 +34,12 @@ public class ExperimentController {
     }
 
     @RequestMapping(value = "/", method = RequestMethod.POST)
-    public Experiment createNewExperiment(@RequestParam(name = "type") ExperimentType type,
-                                          @RequestParam(name = "startDateTime") Date startDateTime,
-                                          @RequestParam(name = "endDateTime") Date endDateTime,
-                                          @RequestParam(name = "userSeed", required = false) Long userSeed,
-                                          @RequestParam(name = "hoursSwitch", required = false) Integer hoursSwitch) {
-        return experimentService.createNewExperiment(type, startDateTime, endDateTime, userSeed, hoursSwitch);
+    public Experiment createNewExperiment(
+//                                            @RequestParam(name = "type") ExperimentType type,
+//                                          @RequestParam(name = "startDateTime") Date startDateTime,
+//                                          @RequestParam(name = "endDateTime") Date endDateTime,
+                                          @RequestParam(name = "userSeed", defaultValue = "123") Long userSeed) {
+        return experimentService.createNewExperiment(userSeed);
     }
 
 }
