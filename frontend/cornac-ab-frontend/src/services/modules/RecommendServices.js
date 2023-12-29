@@ -1,7 +1,11 @@
 import {axios} from '../axios'
 
-export const createCornacInstance = (data) => {
-    return axios.post('/recommend/instance', data)
+export const createCornacInstance = (formData) => {
+    return axios.post('/recommend/instance', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
 }
 
 export const getCornacInstances = () => {
