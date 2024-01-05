@@ -9,5 +9,5 @@ export const createCornacInstance = (formData) => {
 }
 
 export const getCornacInstances = () => {
-    return axios.get(`/recommend/instance`)
+    return axios.get(`/recommend/instance`);
 }
