@@ -5,31 +5,34 @@
             <h1 class="text-3xl font-bold tracking-tight text-gray-900">Environment Setup</h1>
             </div>
         </header>
-        <div class="mt-10 justify-center rounded-lg border border-dashed border-gray-900/25 bg-blue-100 px-6 py-10">
-            <h2 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Setting up your Experiment:</h2>
+        <div v-if="isLoading" class="mt-10 justify-center rounded-lg border border-dashed border-gray-900/25 bg-blue-100 px-6 py-10">
+            <h2 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Setting up your Experiment</h2>
             <ul class="max-w-md space-y-2 text-gray-500 list-inside dark:text-gray-400">
                 <li class="flex items-center">
-                    <svg class="w-4 h-4 me-2 text-green-500 dark:text-green-400 flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                    <svg v-if="!isExperimentCreated" aria-hidden="true" class="w-4 h-4 me-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/><path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/></svg>
+                    <svg v-else class="w-4 h-4 me-2 text-green-500 dark:text-green-400 flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
                     </svg>
-                    Creating your experiment
+                    Creating your experiment environment
                 </li>
-                <li class="flex items-center">
-                    <svg class="w-4 h-4 me-2 text-green-500 dark:text-green-400 flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
-                    </svg>
-                    Spinning up your models
-                </li>
-                <li class="flex items-center">
-                    <div role="status">
-                        <svg aria-hidden="true" class="w-4 h-4 me-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/><path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/></svg>
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                    Preparing your dashboard
-                </li>
+                <div v-for="(model, index) in models" :key="index">
+                    <li class="flex items-center">
+                        <svg v-if="!isExperimentCreated" aria-hidden="true" class="w-4 h-4 me-2 text-gray-200 dark:text-gray-600 fill-blue-600" viewBox="0 0 350 350" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M165,0C74.019,0,0,74.019,0,165s74.019,165,165,165s165-74.019,165-165S255.981,0,165,0z M225.606,175.605
+                            l-80,80.002C142.678,258.535,138.839,260,135,260s-7.678-1.464-10.606-4.394c-5.858-5.857-5.858-15.355,0-21.213l69.393-69.396
+                            l-69.393-69.392c-5.858-5.857-5.858-15.355,0-21.213c5.857-5.858,15.355-5.858,21.213,0l80,79.998
+                            c2.814,2.813,4.394,6.628,4.394,10.606C230,168.976,228.42,172.792,225.606,175.605z"/>
+                        </svg>
+                        <svg v-else-if="!model.isModelReady" aria-hidden="true" class="w-4 h-4 me-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/><path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/></svg>
+                        <svg v-else class="w-4 h-4 me-2 text-green-500 dark:text-green-400 flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
+                        </svg>
+                        Spinning up your model: {{model.name}} - cornac.models.{{ model.class }}
+                    </li>
+                </div>
             </ul>
         </div>
-        <form>
+        <form v-else>
             <div class="space-y-12">
                 <div class="border-b border-gray-900/10 pb-12 mt-12">
                     <h2 class="text-base font-semibold leading-7 text-gray-900">Model setup</h2>
@@ -87,7 +90,6 @@
                                         <svg class="mx-auto h-12 w-12 text-indigo-600" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
                                         </svg>
-                                        <PhotoIcon class="mx-auto h-12 w-12 text-gray-300" aria-hidden="true" />
                                         <p class="text-sm leading-5 font-semibold text-indigo-600">Add more models</p>
                                     </div>
 
@@ -107,7 +109,7 @@
 
             <div class="mt-6 flex items-center justify-end gap-x-6">
             <!-- <button type="button" class="text-sm font-semibold leading-6 text-gray-900">Cancel</button> -->
-            <button v-on:click="submitForm" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Continue</button>
+            <button v-on:click="submitForm" type="button" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Continue</button>
             </div>
         </form>
 
@@ -133,25 +135,29 @@
 </template>
 
 <script>
-import { createCornacInstance } from '../services';
+import { createCornacInstance, createNewExperiment } from '../services';
 
 
 export default {
     data() {
         return {
             isLoading: false,
+            isExperimentCreated: false,
+            loadedModelCount: 0,
             models: [
                 {
                     name: '',
                     class: '',
                     file: '',
                     fileSize: '',
+                    isModelReady: false,
                 },
                 {
                     name: '',
                     class: '',
                     file: '',
                     fileSize: '',
+                    isModelReady: false,
                 }
             ],
         };
@@ -163,6 +169,7 @@ export default {
                 class: '',
                 file: '',
                 fileSize: '',
+                isModelReady: false,
             });
             e.preventDefault();
         },
@@ -180,17 +187,38 @@ export default {
             this.models[index].fileSize = this.formatFileSize(event.target.files[0].size);
         },
         submitForm(e) {
-            this.models.forEach((model) => {
+            this.isLoading = true;
+
+            createNewExperiment({userSeed: 123}).then((response) => {
+                this.isExperimentCreated = true;
+                console.log("Experiment created");
+
+                this.models.forEach((model) => {
                 const formData = new FormData();
                 formData.append('name', model.name);
                 formData.append('modelClass', "cornac.models." + model.class);
                 formData.append('file', model.file);
-                createCornacInstance(formData).then(function(){
-                    console.log('SUCCESS!!');
+                createCornacInstance(formData).then((response) => {
+                    model.isModelReady = true;
+                    console.log("Model" + model.name + "created");
+
+                    this.loadedModelCount++;
+
+                    if (this.loadedModelCount == this.models.length) {
+                        // redirect to dashboard
+                        console.log("All models loaded");
+                        this.$router.push('/dashboard');
+                    }
                 }).catch(function(error){
-                    console.log(error.toJSON());
+                    console.log(error);
+                    this.isLoading = false;
                 });
             });
+            }).catch(function(error){
+                console.log(error);
+                this.isLoading = false;
+            });
+
             e.preventDefault();
         }
     }
