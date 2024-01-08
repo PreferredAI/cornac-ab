@@ -5,7 +5,6 @@ import './index.css'
 import App from './App.vue'
 import Welcome from './views/Welcome.vue'
 import Setup from './views/Setup.vue'
-import HelloWorld from './views/HelloWorld.vue'
 import Dashboard from './views/Dashboard.vue'
 import Evaluation from './views/Evaluation.vue'
 
