@@ -8,4 +8,6 @@ import java.util.List;
 public interface RecommendLogRepository extends CrudRepository<RecommendLog, Long> {
     List<RecommendLog> findAll();
 
+    RecommendLog findById(String id);
+
 }
