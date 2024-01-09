@@ -28,6 +28,9 @@ public class RecommendController {
             @RequestParam(name = "name", defaultValue = "model") String name,
             @RequestParam(name = "modelClass") String modelClass,
             @RequestParam("file") MultipartFile file) {
+        System.out.println(name);
+        System.out.println(modelClass);
+        System.out.println(file.getName());
         return recommendService.createCornacInstance(name, modelClass, file);
     }
 

@@ -7,6 +7,7 @@ import ai.preferred.cornac.repository.RecommendLogRepository;
 import ai.preferred.cornac.repository.UserAbAllocationRepository;
 import ai.preferred.cornac.util.FileUtil;
 import jakarta.annotation.PreDestroy;
+import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -213,9 +214,9 @@ public class RecommendService {
         RecommendLog log = new RecommendLog(
                 null,
                 experiment.getId(),
-                recommendation.getRecommendations(),
-                recommendation.getQuery(),
-                new ArrayList<>()
+                userId,
+                DateTime.now(),
+                recommendation.getRecommendations()
         );
 
         RecommendLog recommendLog = recommendLogRepository.save(log);

@@ -1,30 +1,44 @@
 package ai.preferred.cornac.service;
 
+import ai.preferred.cornac.entity.Feedback;
 import ai.preferred.cornac.entity.RecommendLog;
+import ai.preferred.cornac.repository.FeedbackRepository;
 import ai.preferred.cornac.repository.RecommendLogRepository;
+import org.joda.time.DateTime;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.util.List;
 
 @Service
 public class FeedbackService {
-    private final RecommendLogRepository feedbackRepository;
+    private final FeedbackRepository feedbackRepository;
 
-    public FeedbackService(RecommendLogRepository feedbackRepository) {
+    private final RecommendLogRepository recommendLogRepository;
+
+    public FeedbackService(FeedbackRepository feedbackRepository, RecommendLogRepository recommendLogRepository) {
         this.feedbackRepository = feedbackRepository;
+        this.recommendLogRepository = recommendLogRepository;
     }
 
-    public List<RecommendLog> getFeedbacks(String userId, String itemId) {
-        return feedbackRepository.findAll(); //TODO: filter
-    }
+    public Feedback addFeedback(String recommendId, String itemId, Integer rating) {
+        RecommendLog recommendLog = recommendLogRepository.findById(recommendId);
 
-    public void createCornacInstance() {
-        try {
-            Process process = new ProcessBuilder("java", "-version").start();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (recommendLog == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ID not found");
         }
+
+        Feedback feedback = new Feedback();
+        feedback.setItemId(itemId);
+        feedback.setRating(rating);
+        feedback.setUserId(recommendLog.getUserId());
+        feedback.setTimestamp(DateTime.now());
+
+        return feedbackRepository.save(feedback);
+    }
+    public List<Feedback> getFeedbacks(Long experimentId) {
+        return feedbackRepository.findAllByExperimentId(experimentId);
     }
 
 
