@@ -47,7 +47,7 @@
                                         <input type="text" name="model-name" v-bind:id="'model-name-' + index"  v-model="model.name" class="block w-full px-4 py-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="My model" />
                                     </div>
                                 </div>
-                                <div class="col-span-4 mt-4">
+                                <!-- <div class="col-span-4 mt-4">
                                     <label v-bind:for="'model-class-' + index" class="block text-sm font-medium leading-6 text-gray-900">Model class</label>
                                     <div class="mt-2">
                                         <div class="flex w-full rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
@@ -55,7 +55,7 @@
                                             <input type="text" name="model-class" v-bind:id="'model-class-' + index" v-model="model.class" class="block flex-1 border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" placeholder="MF" />
                                         </div>
                                     </div>
-                                </div>
+                                </div> -->
                                 <div class="col-span-4 mt-4">
                                     <label for="model-file" class="block text-sm font-medium leading-6 text-gray-900">Model file</label>
                                     <label v-bind:for="'dropzone-file-' + index" class="flex mt-2 flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
@@ -196,7 +196,9 @@ export default {
                 this.models.forEach((model) => {
                 const formData = new FormData();
                 formData.append('name', model.name);
-                formData.append('modelClass', "cornac.models." + model.class);
+                // formData.append('modelClass', "cornac.models." + model.class);
+
+                formData.append('modelClass', "cornac.models.MF");
                 formData.append('file', model.file);
                 createCornacInstance(formData).then((response) => {
                     model.isModelReady = true;
