@@ -53,7 +53,7 @@ const openModal = () => {
             </div>
             <div v-if="feedbackData.length" class="mt-8 max-h-96 overflow-auto overscroll-contain">
                 <p class="text-l tracking-tight text-gray-900">
-                    This will run evaluation for the below {{ feedbackData.length }} feedback records provided by users.
+                    These {{ feedbackData.length }} feedback records provided by users will be added to the evaluation.
                 </p>
 
                 <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -63,6 +63,7 @@ const openModal = () => {
                         <th scope="col" class="px-6 py-3">Item ID</th>
                         <th scope="col" class="px-6 py-3">Rating</th>
                         <th scope="col" class="px-6 py-3">Timestamp</th>
+                        <th scope="col" class="px-6 py-3">Model Allocated</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -71,6 +72,7 @@ const openModal = () => {
                             <td class="px-6 py-4">{{ feedback.itemId }}</td>
                             <td class="px-6 py-4">{{ feedback.rating }}</td>
                             <td class="px-6 py-4">{{ feedback.timestamp }}</td>
+                            <td class="px-6 py-4">{{ feedback.modelAllocated }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -83,8 +85,12 @@ const openModal = () => {
         
         <div class="lg:grid lg:gap-4">
             <h2 class="mt-12 text-2xl tracking-tight font-semibold text-gray-900 col-span-12">Select metrics to compute</h2>
+            <p class="text-l tracking-tight text-gray-900">
+                These {{ addedMetrics.length }} metrics will be added to the evaluation.
+            </p>
+
             <div class="lg:grid lg:col-span-12 lg:grid-cols-4 lg:gap-x-6">
-                <AddMetricModal ref="modal" />
+                <AddMetricModal ref="modal" :metrics-already-added="addedMetrics" @add-metric="addMetric" />
                 <div v-for="(addedMetric, index) in addedMetrics" :key="index" class="my-2 grid grid-cols-1">
                     <div class="transition relative mt-2 grid place-items-center rounded-lg border ring-2 ring-indigo-500 border-indigo-900/25 py-1">
                         <!-- <p class="mb-2 text-sm uppercase font-semibold text-center text-black">{{ addedMetric.type }} metric</p> -->
@@ -120,6 +126,24 @@ const openModal = () => {
         </div> -->
             <div class="mt-8 mb-4 col-span-12">
                 <h2 class="text-2xl font-bold tracking-tight text-gray-900">Evaluation Results</h2>
+            </div>
+            <div class="col-span-12">
+                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">MF - Variant A</th>
+                            <th scope="col" class="px-6 py-3">MF - Variant B</th>
+                            <th scope="col" class="px-6 py-3">MF - Variant C</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(feedback, index) in feedbackData" :key="index" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <td class="px-6 py-4">0.7430</td>
+                            <td class="px-6 py-4">0.8998</td>
+                            <td class="px-6 py-4">0.7445</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
             <SimpleCard>
                 <template #header>
@@ -256,49 +280,57 @@ export default {
                     userId: 9,
                     itemId: 8,
                     rating: 1,
-                    timestamp: '2023-12-13 15:46:10'
+                    timestamp: '2023-12-13 15:46:10',
+                    modelAllocated: 'MF - Variant C'
                 },
                 {
                     userId: 15,
                     itemId: 398,
                     rating: 1,
-                    timestamp: '2023-12-13 15:46:16'
+                    timestamp: '2023-12-13 15:46:16',
+                    modelAllocated: 'MF - Variant C'
                 },
                 {
                     userId: 15,
                     itemId: 275,
                     rating: 1,
-                    timestamp: '2023-12-13 15:46:21'
+                    timestamp: '2023-12-13 15:46:21',
+                    modelAllocated: 'MF - Variant C'
                 },
                 {
                     userId: 37,
                     itemId: 7173,
                     rating: 1,
-                    timestamp: '2023-12-13 15:46:26'
+                    timestamp: '2023-12-13 15:46:26',
+                    modelAllocated: 'MF - Variant A'
                 },
                 {
                     userId: 34,
                     itemId: 380,
                     rating: 1,
-                    timestamp: '2023-12-13 15:46:30'
+                    timestamp: '2023-12-13 15:46:30',
+                    modelAllocated: 'MF - Variant A'
                 },
                 {
                     userId: 34,
                     itemId: 483,
                     rating: 1,
-                    timestamp: '2023-12-13 15:46:37'
+                    timestamp: '2023-12-13 15:46:37',
+                    modelAllocated: 'MF - Variant A'
                 },
                 {
-                    userId: 34,
+                    userId: 35,
                     itemId: 8598,
                     rating: 1,
-                    timestamp: '2023-12-13 15:46:37'
+                    timestamp: '2023-12-13 15:46:37',
+                    modelAllocated: 'MF - Variant B'
                 },
                 {
-                    userId: 34,
+                    userId: 35,
                     itemId: 3581,
                     rating: 1,
-                    timestamp: '2023-12-13 15:46:38'
+                    timestamp: '2023-12-13 15:46:38',
+                    modelAllocated: 'MF - Variant A'
                 }
             ]
         };
@@ -317,6 +349,9 @@ export default {
         removeMetric(index) {
             this.addedMetrics.splice(index, 1);
         },
+        addMetric(metricSelected) {
+            this.addedMetrics.push(metricSelected);
+        }
     }
 };
 </script>
