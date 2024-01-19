@@ -1,11 +1,6 @@
 <script setup>
 import BookDetailsModal from '../components/BookDetailsModal.vue';
 const modal = ref(null);
-
-const openModal = () => {
-  modal.value.open();
-};
-
 </script>
 
 <template>
@@ -15,12 +10,12 @@ const openModal = () => {
       <div class="mx-auto py-8 sm:py-8 lg:py-8">
         <div class="bg-white">
           <div class="mx-auto max-w-2xl px-4 py-4 sm:px-6 lg:max-w-7xl lg:px-8">
-            <BookDetailsModal ref="modal" :book.title="test" />
+            <BookDetailsModal ref="modal" :book="selectedBook" />
             <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Books Recommended for you</h2>
-            <p class="mt-4 text-gray-500">These books are specially curated and recommended. Click on any of these books to view and rate them.</p>
+            <p class="mt-4 text-gray-500">These books are specially curated and recommended. Click on any of these books to view more about them.</p>
 
             <div class="grid grid-cols-1 gap-x-24 gap-y-12 mt-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-16">
-              <button v-for="book in books" :key="book.book_id" @click="openModal" class="group">
+              <button v-for="book in books" :key="book.book_id" v-on:click="" @click="openModal(book)" class="group">
                 <div class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
                   <img :src="book.image_url" :alt="book.small_image_url" class="h-full w-full object-cover object-center group-hover:opacity-75" />
                 </div>
@@ -81,5 +76,12 @@ export default {
         this.$router.push('/login'); // redirect to welcome page
       }
     },
+    methods: {
+      openModal(bookSelected) {
+        // do API call to track book click (feedback)
+        this.selectedBook = bookSelected;
+        this.$refs.modal.open();
+      }
+    }
 };
 </script>
