@@ -1,5 +1,4 @@
 <script setup>
-import SimpleCard from '../components/SimpleCard.vue';
 import { XMarkIcon } from '@heroicons/vue/24/outline';
 import AddMetricModal from '../components/AddMetricModal.vue';
 
@@ -114,93 +113,31 @@ const openModal = () => {
                 </div>
             </div>
             <div class="mt-6 flex items-center justify-end gap-x-6 col-span-12">
-                <!-- <button type="button" class="text-sm font-semibold leading-6 text-gray-900">Cancel</button> -->
                 <button v-on:click="evaluateData" type="button" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Continue</button>
             </div>
         </div>
     </div>
     <div v-else>
         <div class="lg:grid lg:gap-4">
-        <!-- <div class="mt-4 mb-4">
-            <button class="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md">Run Evaluation</button>
-        </div> -->
             <div class="mt-8 mb-4 col-span-12">
                 <h2 class="text-2xl font-bold tracking-tight text-gray-900">Evaluation Results</h2>
             </div>
             <div class="col-span-12">
                 <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <thead class="text-s text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
-                            <th scope="col" class="px-6 py-3">MF - Variant A</th>
-                            <th scope="col" class="px-6 py-3">MF - Variant B</th>
-                            <th scope="col" class="px-6 py-3">MF - Variant C</th>
+                            <th></th>
+                            <th v-for="(model, index) in evaluationResults.models" :key="index" scope="col" class="px-6 py-3">{{ model }}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(feedback, index) in feedbackData" :key="index" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                            <td class="px-6 py-4">0.7430</td>
-                            <td class="px-6 py-4">0.8998</td>
-                            <td class="px-6 py-4">0.7445</td>
+                        <tr v-for="(metric, index) in evaluationResults.metrics" :key="index" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <td class="text-s font-bold text-gray-700 px-6 py-4 bg-gray-50 dark:bg-gray-700 dark:text-gray-400">{{ metric.metric }}</td>
+                            <td v-for="(value, valIndex) in metric.values" :key="valIndex" class="px-6 py-4">{{ value }} </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <SimpleCard>
-                <template #header>
-                    MAE
-                </template>
-                <template #content>
-                    0.7430
-                </template>
-            </SimpleCard>
-            <SimpleCard>
-                <template #header>
-                    RMSE
-                </template>
-                <template #content>
-                    0.8998
-                </template>
-            </SimpleCard>
-            <SimpleCard>
-                <template #header>
-                    AUC
-                </template>
-                <template #content>
-                    0.7445
-                </template>
-            </SimpleCard>
-            <SimpleCard>
-                <template #header>
-                    MAP
-                </template>
-                <template #content>
-                    0.0548
-                </template>
-            </SimpleCard>
-            <SimpleCard>
-                <template #header>
-                    NDCG @ 10
-                </template>
-                <template #content>
-                    0.0761
-                </template>
-            </SimpleCard>
-            <SimpleCard>
-                <template #header>
-                    Precision @ 10
-                </template>
-                <template #content>
-                    0.0675
-                </template>
-            </SimpleCard>
-            <SimpleCard>
-                <template #header>
-                    Recall @ 10
-                </template>
-                <template #content>
-                    0.0463
-                </template>
-            </SimpleCard>
         </div>
         <div class="mt-6 flex items-center justify-start gap-x-6 col-span-12">
             <!-- <button type="button" class="text-sm font-semibold leading-6 text-gray-900">Cancel</button> -->
@@ -332,7 +269,60 @@ export default {
                     timestamp: '2023-12-13 15:46:38',
                     modelAllocated: 'MF - Variant A'
                 }
-            ]
+            ],
+            evaluationResults: {
+                "models": ["MF - Variant A", "MF - Variant B", "MF - Variant C"],
+                "metrics": [
+                    {
+                        "metric": "MAE",
+                        "values": [0.7430, 0.8998, 0.7445]
+                    },
+                    {
+                        "metric": "RMSE",
+                        "values": [0.7430, 0.8998, 0.7445]
+                    },
+                    {
+                        "metric": "MSE",
+                        "values": [0.7430, 0.8998, 0.7445]
+                    },
+                    {
+                        "metric": "NDCG",
+                        "values": [0.7430, 0.8998, 0.7445]
+                    },
+                    {
+                        "metric": "NCRR",
+                        "values": [0.7430, 0.8998, 0.7445]
+                    },
+                    {
+                        "metric": "MRR",
+                        "values": [0.7430, 0.8998, 0.7445]
+                    },
+                    {
+                        "metric": "HitRatio",
+                        "values": [0.7430, 0.8998, 0.7445]
+                    },
+                    {
+                        "metric": "Precision",
+                        "values": [0.7430, 0.8998, 0.7445]
+                    },
+                    {
+                        "metric": "Recall",
+                        "values": [0.7430, 0.8998, 0.7445]
+                    },
+                    {
+                        "metric": "FMeasure",
+                        "values": [0.7430, 0.8998, 0.7445]
+                    },
+                    {
+                        "metric": "AUC",
+                        "values": [0.7430, 0.8998, 0.7445]
+                    },
+                    {
+                        "metric": "MAP",
+                        "values": [0.7430, 0.8998, 0.7445]
+                    }
+                ]
+            },
         };
     },
     methods: {
