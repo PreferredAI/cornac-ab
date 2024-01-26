@@ -13,12 +13,12 @@
         </div> -->
         <div class="flex items-center justify-center">
             <div>
-                <span class="text-sm font-medium">
-                    <slot name="header" />
-                </span>
                 <h4 class="text-title-md font-semibold text-black dark:text-white">
-                    <slot name="content" />
+                    <slot name="header" />
                 </h4>
+                <span class="text-md">
+                    <slot name="content" />
+                </span>
             </div>
         </div>
     </div>
