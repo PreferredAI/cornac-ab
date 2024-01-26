@@ -73,20 +73,22 @@ import 'v-calendar/style.css';
         </div>
         <div class="mt-4 max-h-96 w-full overflow-auto overscroll-contain">
             <table v-if="usersAssignedModels.length" class="w-full text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <thead class="text-sm text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
                         <th scope="col" class="px-6 py-3">User ID</th>
                         <th scope="col" class="px-6 py-3">Model Assigned</th>
                         <th scope="col" class="px-6 py-3">Recommendations Served</th>
                         <th scope="col" class="px-6 py-3">Feedbacks by User</th>
+                        <th scope="col" class="px-6 py-3">Last Feedback Interaction</th>
                     </tr>
                 </thead>
-                <tbody class="text-xs">
+                <tbody class="text-sm">
                     <tr v-for="(userModel, index) in usersAssignedModels" :key="index" class="bg-white border dark:bg-gray-800 dark:border-gray-700">
                         <td class="px-6 py-2">{{ userModel.userID }}</td>
                         <td class="px-6 py-2">{{ userModel.modelAssigned }}</td>
-                        <td></td>
-                        <td></td>
+                        <td class="px-6 py-2">{{ userModel.recommendationsMade }}</td>
+                        <td class="px-6 py-2">{{ userModel.feedbackMade }}</td>
+                        <td class="px-6 py-2">{{ userModel.lastFeedback }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -207,50 +209,44 @@ export default {
                 {
                     userID: '1',
                     modelAssigned: 'BPR',
+                    recommendationsMade: 25,
+                    feedbackMade: 10,
+                    lastFeedback: '2024-01-06 16:23:42'
                 },
                 {
                     userID: '4',
                     modelAssigned: 'BPR',
+                    recommendationsMade: 43,
+                    feedbackMade: 12,
+                    lastFeedback: '2024-01-12 20:46:11'
                 },
                 {
                     userID: '6',
                     modelAssigned: 'LightGCN',
+                    recommendationsMade: 12,
+                    feedbackMade: 1,
+                    lastFeedback: '2024-01-01 09:02:02'
                 },
                 {
                     userID: '13',
                     modelAssigned: 'BPR',
+                    recommendationsMade: 59,
+                    feedbackMade: 35,
+                    lastFeedback: '2024-01-11 23:20:49'
                 },
                 {
                     userID: '15',
                     modelAssigned: 'LightGCN',
+                    recommendationsMade: 49,
+                    feedbackMade: 32,
+                    lastFeedback: '2024-01-12 21:55:56'
                 },
                 {
                     userID: '23',
                     modelAssigned: 'BiVAECF',
-                },
-                {
-                    userID: '1',
-                    modelAssigned: 'BPR',
-                },
-                {
-                    userID: '4',
-                    modelAssigned: 'BPR',
-                },
-                {
-                    userID: '6',
-                    modelAssigned: 'LightGCN',
-                },
-                {
-                    userID: '13',
-                    modelAssigned: 'BPR',
-                },
-                {
-                    userID: '15',
-                    modelAssigned: 'LightGCN',
-                },
-                {
-                    userID: '23',
-                    modelAssigned: 'BiVAECF',
+                    recommendationsMade: 65,
+                    feedbackMade: 36,
+                    lastFeedback: '2024-01-11 23:45:32'
                 },
             ],
             dashboardFilters:{
