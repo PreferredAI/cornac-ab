@@ -20,32 +20,27 @@ const openModal = () => {
     </header>
     <div v-if="!isEvaluationDone">
         <div>
+            <h2 class="mt-8 text-2xl tracking-tight font-semibold text-gray-900">Filters Selected</h2>
+            Date Range, Models selected
+        </div>
+        <!-- <div>
             <h2 class="mt-8 text-2xl tracking-tight font-semibold text-gray-900">Select Evaluation Period</h2>
 
             <div class="grid grid-cols-4 gap-4 mt-4 sm:grid-cols-8 lg:grid-cols-4">
                 <div v-for="dayNum in possibleDays">
-                    <!-- Active: "ring-2 ring-indigo-500" -->
                     <label v-if="dayNum == selectedDays" class="group relative flex items-center justify-center rounded-md border ring-2 ring-indigo-500 py-3 px-4 text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-6 cursor-pointer bg-white text-gray-900 shadow-sm">
                         <input type="radio" name="size-choice" v-model="selectedDays" :value="dayNum" class="sr-only" aria-labelledby="size-choice-1-label">
                         <span id="size-choice-1-label">Past {{ dayNum }} Days</span>
-                        <!--
-                        Active: "border", Not Active: "border-2"
-                        Checked: "border-indigo-500", Not Checked: "border-transparent"
-                        -->
                         <span class="pointer-events-none absolute -inset-px rounded-md" aria-hidden="true"></span>
                     </label>
                     <label v-else class="group relative flex items-center justify-center rounded-md border py-3 px-4 text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-6 cursor-pointer bg-white text-gray-900 shadow-sm">
                         <input type="radio" name="size-choice" v-model="selectedDays" :value="dayNum" class="sr-only" aria-labelledby="size-choice-1-label">
                         <span id="size-choice-1-label">Past {{ dayNum }} Days</span>
-                        <!--
-                        Active: "border", Not Active: "border-2"
-                        Checked: "border-indigo-500", Not Checked: "border-transparent"
-                        -->
                         <span class="pointer-events-none absolute -inset-px rounded-md" aria-hidden="true"></span>
                     </label>
                 </div>
             </div>
-        </div>
+        </div> -->
         <div>
             <div class="mt-8 mb-4 col-span-12">
                 <h2 class="mt-8 text-2xl tracking-tight font-semibold text-gray-900">Feedback data from past {{ selectedDays }} days</h2>
@@ -91,14 +86,14 @@ const openModal = () => {
             <div class="lg:grid lg:col-span-12 lg:grid-cols-4 lg:gap-x-6">
                 <AddMetricModal ref="modal" :metrics-already-added="addedMetrics" @add-metric="addMetric" />
                 <div v-for="(addedMetric, index) in addedMetrics" :key="index" class="my-2 grid grid-cols-1">
-                    <div class="transition relative mt-2 grid place-items-center rounded-lg border ring-2 ring-indigo-500 border-indigo-900/25 py-1">
+                    <div class="transition relative mt-2 grid place-items-center rounded-lg border bg-indigo-500 ring-2 ring-indigo-500 border-grey-300/25 py-1">
                         <!-- <p class="mb-2 text-sm uppercase font-semibold text-center text-black">{{ addedMetric.type }} metric</p> -->
-                        <button type="button" class="absolute right-1 text-gray-400 hover:text-gray-500" @click="removeMetric(index)">
+                        <button type="button" class="absolute right-1 text-white hover:text-gray-500" @click="removeMetric(index)">
                             <span class="sr-only">Remove</span>
                             <XMarkIcon class="h-6 w-6" aria-hidden="true" />
                         </button>
-                        <p class="text-xl font-semibold text-center text-black">{{ addedMetric.metric }}</p>
-                        <p v-if="addedMetric.k" class="mt-1 text-sm uppercase font-semibold text-center text-black">k={{ addedMetric.k }}</p>
+                        <p class="text-xl font-semibold text-center text-white">{{ addedMetric.metric }}</p>
+                        <p v-if="addedMetric.k" class="mt-1 text-sm uppercase font-semibold text-center text-white">k={{ addedMetric.k }}</p>
                     </div>
                 </div>
                 <div class="my-2 grid grid-cols-1">
