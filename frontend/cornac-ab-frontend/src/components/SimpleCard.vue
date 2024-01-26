@@ -4,14 +4,11 @@
             <h5 class="mb-2 text-xl font-semibold tracking-tight text-gray-900 dark:text-white">
                 <slot name="header" />
             </h5>
-            <p class="font-normal text-lg text-gray-700 dark:text-gray-400">
+            <p class="font-normal text-md text-gray-700 dark:text-gray-400">
                 <slot name="content" />
             </p>
         </div>
     </div>
-    <!-- <div class="bg-white rounded-lg shadow-md p-4">
-        <slot></slot>
-    </div> -->
 </template>
 
 <script>
