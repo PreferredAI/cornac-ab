@@ -34,15 +34,15 @@
         </div>
         <form v-else>
             <div class="space-y-12">
-                <div class="border-b border-gray-900/10 pb-12 mt-12">
-                    <h2 class="text-base font-semibold leading-7 text-gray-900">Model setup</h2>
-                    <p class="mt-1 text-sm leading-6 text-gray-600">Add your trained models by zipping them up and uploading them here.</p>
+                <div class="border-b border-gray-900/10 pb-12 mt-6">
+                    <h2 class="mt-6 text-2xl tracking-tight font-semibold text-gray-900">Model setup</h2>
+                    <p class="mt-1 text-md text-gray-900">Add your trained models by zipping them up and uploading them here.</p>
 
                     <div class="lg:grid lg:grid-cols-2 lg:gap-x-6">
-                        <div v-for="(model, index) in models" :key="index" class="mt-10 grid grid-cols-1">
-                            <div class="transition mt-2 justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-5">
-                                <div class="col-span-4 mt-4">
-                                    <label v-bind:for="'model-name-' + index" class="block text-sm font-medium leading-6 text-gray-900">Model name</label>
+                        <div v-for="(model, index) in models" :key="index" class="mt-6 grid grid-cols-1">
+                            <div class="transition mt-2 justify-center rounded-lg border border-dashed border-gray-900/25 px-4 py-4">
+                                <div class="col-span-4 mt-2">
+                                    <label v-bind:for="'model-name-' + index" class="block text-lg font-semibold leading-6 text-gray-900">Model name</label>
                                     <div class="mt-2">
                                         <input type="text" name="model-name" v-bind:id="'model-name-' + index"  v-model="model.name" class="block w-full px-4 py-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="My model" />
                                     </div>
@@ -57,8 +57,8 @@
                                     </div>
                                 </div> -->
                                 <div class="col-span-4 mt-4">
-                                    <label for="model-file" class="block text-sm font-medium leading-6 text-gray-900">Model file</label>
-                                    <label v-bind:for="'dropzone-file-' + index" class="flex mt-2 flex-col items-center justify-center w-full h-36 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                                    <label for="model-file" class="block text-lg font-semibold leading-6 text-gray-900">Model file</label>
+                                    <label :class="model.file ? 'bg-green-50': 'bg-grey-50'" v-bind:for="'dropzone-file-' + index" class="flex mt-2 flex-col items-center justify-center w-full h-36 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
                                         <div v-if="!model.file" class="flex flex-col items-center justify-center pt-5 pb-6">
                                             <svg class="w-8 h-8 mb-2 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
                                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
@@ -70,8 +70,8 @@
                                             <svg class="w-8 h-8 mb-2 text-gray-500 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg" height="32" fill="none" viewBox="0 -960 960 960" width="32">
                                                 <path fill="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m424-296 282-282-56-56-226 226-114-114-56 56 170 170Zm56 216q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/>
                                             </svg>
-                                            <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Added file</span></p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400"><span class="font-semibold">{{model.file.name}}</span>, {{ model.fileSize }}</p>
+                                            <p class="mb-2 text-md text-gray-500 dark:text-gray-400"><span class="font-semibold">File Added</span></p>
+                                            <p class="text-md text-gray-500 dark:text-gray-400"><span class="font-semibold">{{model.file.name}}</span>, {{ model.fileSize }}</p>
                                         </div>
                                         <input v-bind:id="'dropzone-file-' + index" type="file" v-on:change="fileAdded($event, index)" accept=".zip" class="hidden" />
                                     </label>
@@ -83,14 +83,14 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-10 grid grid-cols-1">
+                        <div class="mt-6 grid grid-cols-1">
                             <button @click="addMoreModel" class="mt-2 justify-center bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-dashed fill border-gray-900/25 px-6 py-10">
 
                                     <div class="text-center">
                                         <svg class="mx-auto h-12 w-12 text-indigo-600" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
                                         </svg>
-                                        <p class="text-sm leading-5 font-semibold text-indigo-600">Add more models</p>
+                                        <p class="mt-2 text-lg leading-5 font-semibold text-indigo-600">Add More Models</p>
                                     </div>
 
                                 </button>
@@ -146,19 +146,26 @@ export default {
             loadedModelCount: 0,
             models: [
                 {
-                    name: '',
+                    name: 'BPR',
                     class: '',
-                    file: '',
-                    fileSize: '',
+                    file: { name: 'BPR.zip' },
+                    fileSize: '34.85 MB',
                     isModelReady: false,
                 },
                 {
-                    name: '',
+                    name: 'BiVAECF',
                     class: '',
-                    file: '',
-                    fileSize: '',
+                    file: { name: 'BiVAECF.zip' },
+                    fileSize: '68.56 MB',
                     isModelReady: false,
-                }
+                },
+                {
+                    name: 'LightGCN',
+                    class: '',
+                    file: { name: 'LightGCN.zip' },
+                    fileSize: '54.05 MB',
+                    isModelReady: false,
+                },
             ],
         };
     },
