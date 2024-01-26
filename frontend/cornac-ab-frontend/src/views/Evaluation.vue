@@ -94,7 +94,7 @@ const openModal = () => {
                     <div class="transition relative mt-2 grid place-items-center rounded-lg border ring-2 ring-indigo-500 border-indigo-900/25 py-1">
                         <!-- <p class="mb-2 text-sm uppercase font-semibold text-center text-black">{{ addedMetric.type }} metric</p> -->
                         <button type="button" class="absolute right-1 text-gray-400 hover:text-gray-500" @click="removeMetric(index)">
-                            <span class="sr-only">Close</span>
+                            <span class="sr-only">Remove</span>
                             <XMarkIcon class="h-6 w-6" aria-hidden="true" />
                         </button>
                         <p class="text-xl font-semibold text-center text-black">{{ addedMetric.metric }}</p>
@@ -177,7 +177,7 @@ export default {
                 },
                 {
                     metric: "MRR",
-                    type: "ranking",
+                    type: "ranking", //no k
                     k: 10
                 },
                 {
@@ -202,12 +202,12 @@ export default {
                 },
                 {
                     metric: "AUC",
-                    type: "ranking",
+                    type: "ranking", //no k
                     k: 10
                 },
                 {
                     metric: "MAP",
-                    type: "ranking",
+                    type: "ranking", //no k
                     k: 10
                 }
             ],
@@ -218,109 +218,73 @@ export default {
                     itemId: 8,
                     rating: 1,
                     timestamp: '2023-12-13 15:46:10',
-                    modelAllocated: 'MF - Variant C'
+                    modelAllocated: 'LightGCN'
                 },
                 {
                     userId: 15,
                     itemId: 398,
                     rating: 1,
                     timestamp: '2023-12-13 15:46:16',
-                    modelAllocated: 'MF - Variant C'
+                    modelAllocated: 'LightGCN'
                 },
                 {
                     userId: 15,
                     itemId: 275,
                     rating: 1,
                     timestamp: '2023-12-13 15:46:21',
-                    modelAllocated: 'MF - Variant C'
+                    modelAllocated: 'LightGCN'
                 },
                 {
                     userId: 37,
                     itemId: 7173,
                     rating: 1,
                     timestamp: '2023-12-13 15:46:26',
-                    modelAllocated: 'MF - Variant A'
+                    modelAllocated: 'BPR'
                 },
                 {
                     userId: 34,
                     itemId: 380,
                     rating: 1,
                     timestamp: '2023-12-13 15:46:30',
-                    modelAllocated: 'MF - Variant A'
+                    modelAllocated: 'BPR'
                 },
                 {
                     userId: 34,
                     itemId: 483,
                     rating: 1,
                     timestamp: '2023-12-13 15:46:37',
-                    modelAllocated: 'MF - Variant A'
+                    modelAllocated: 'BPR'
                 },
                 {
                     userId: 35,
                     itemId: 8598,
                     rating: 1,
                     timestamp: '2023-12-13 15:46:37',
-                    modelAllocated: 'MF - Variant B'
+                    modelAllocated: 'BiVAECF'
                 },
                 {
                     userId: 35,
                     itemId: 3581,
                     rating: 1,
                     timestamp: '2023-12-13 15:46:38',
-                    modelAllocated: 'MF - Variant A'
+                    modelAllocated: 'BPR'
                 }
             ],
             evaluationResults: {
-                "models": ["MF - Variant A", "MF - Variant B", "MF - Variant C"],
+                "models": ["BPR", "BiVAECF", "LightGCN"],
                 "metrics": [
                     {
-                        "metric": "MAE",
-                        "values": [0.7430, 0.8998, 0.7445]
-                    },
-                    {
-                        "metric": "RMSE",
-                        "values": [0.7430, 0.8998, 0.7445]
-                    },
-                    {
-                        "metric": "MSE",
-                        "values": [0.7430, 0.8998, 0.7445]
-                    },
-                    {
-                        "metric": "NDCG",
-                        "values": [0.7430, 0.8998, 0.7445]
-                    },
-                    {
-                        "metric": "NCRR",
-                        "values": [0.7430, 0.8998, 0.7445]
-                    },
-                    {
-                        "metric": "MRR",
-                        "values": [0.7430, 0.8998, 0.7445]
-                    },
-                    {
-                        "metric": "HitRatio",
-                        "values": [0.7430, 0.8998, 0.7445]
-                    },
-                    {
-                        "metric": "Precision",
-                        "values": [0.7430, 0.8998, 0.7445]
-                    },
-                    {
-                        "metric": "Recall",
-                        "values": [0.7430, 0.8998, 0.7445]
-                    },
-                    {
-                        "metric": "FMeasure",
-                        "values": [0.7430, 0.8998, 0.7445]
-                    },
-                    {
                         "metric": "AUC",
-                        "values": [0.7430, 0.8998, 0.7445]
+                        "values": [0.8477, 0.8991, 0.8982]
                     },
                     {
-                        "metric": "MAP",
-                        "values": [0.7430, 0.8998, 0.7445]
-                    }
+                        "metric": "NDCG@50",
+                        "values": [0.0567, 0.0720, 0.0704]
+                    },
+                    {
+                        "metric": "Recall@50",
+                        "values": [0.0821, 0.1117, 0.1097]
+                    },
                 ]
             },
         };
