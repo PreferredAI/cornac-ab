@@ -39,7 +39,7 @@ defineExpose({ open, modalClose });
                     <button @click="selectMetric(metric, 'ranking')" :class="metric == metricSelected.metric ? 'bg-indigo-100 ring-2 ring-indigo-500':''" class="w-full mt-2 grid place-items-center rounded-lg border border-indigo-900/25 hover:bg-gray-50 py-1">
                       <p class="text-l font-semibold text-center text-black">{{ metric }}</p>
                     </button>
-                    <div :class="metric == metricSelected.metric ? 'ring-2 ring-indigo-500':'invisible'" class="relative mt-2 rounded-md shadow-sm">
+                    <div v-if="!nonKMetrics.includes(metric)" :class="metric == metricSelected.metric ? 'ring-2 ring-indigo-500':'invisible'" class="relative mt-2 rounded-md shadow-sm">
                       <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                         <span class="text-gray-500 sm:text-sm">K=</span>
                       </div>
@@ -102,7 +102,15 @@ export default {
               "AUC",
               "MAP"
             ],
-          }
+          },
+          nonKMetrics: [
+            "MAE",
+            "RMSE",
+            "MSE",
+            "MRR",
+            "AUC",
+            "MAP"
+          ]
       }
     },
     methods: {
@@ -112,7 +120,7 @@ export default {
           "type": type
         };
 
-        if (type == "ranking") {
+        if (!this.nonKMetrics.includes(metric)) {
           this.metricSelected.k = "";
         }
       },
