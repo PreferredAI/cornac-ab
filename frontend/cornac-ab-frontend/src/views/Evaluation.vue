@@ -1,6 +1,9 @@
 <script setup>
 import { XMarkIcon } from '@heroicons/vue/24/outline';
 import AddMetricModal from '../components/AddMetricModal.vue';
+import { ArrowRightCircleIcon } from '@heroicons/vue/24/solid'
+import { Calendar, DatePicker } from 'v-calendar';
+import 'v-calendar/style.css';
 
 import { ref } from 'vue';
 
@@ -21,7 +24,34 @@ const openModal = () => {
     <div v-if="!isEvaluationDone">
         <div>
             <h2 class="mt-8 text-2xl tracking-tight font-semibold text-gray-900">Filters Selected</h2>
-            Date Range, Models selected
+        </div>
+        <div class="mt-2 grid grid-cols-12 bg-white">
+            <div class="col-span-6 mx-2 bg-gray-50 rounded-lg border border-dashed border-gray-900/25 px-6 py-4">
+                <p class="text-base font-semibold leading-6 text-gray-900">Timestamp</p>
+
+                <div class="mt-2">
+                    <p class="w-1/3 inline bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">23/12/2023</p>
+                    <ArrowRightCircleIcon class="inline mx-2 h-10 w-10 text-indigo-600" />
+                    <p class="w-1/3 inline bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">30/12/2023</p>
+                </div>
+            </div>
+            <div class="col-span-6 mx-2 bg-gray-50 rounded-lg border border-dashed border-gray-900/25 px-6 py-4">
+                <p class="text-base font-semibold leading-6 text-gray-900 col-span-3">Filter by Model</p>
+                <div class="grid grid-cols-3 mt-2">
+                    <div class="relative mt-2 mx-2 grid place-items-center rounded-lg border border-indigo-900/25 py-1 ring-2 ring-indigo-500 bg-indigo-100">
+                        <button type="button" class="absolute right-1 text-gray-400 hover:text-gray-500" />
+                        <p class="text-md font-semibold text-center text-black">BPR</p>
+                    </div>
+                    <div class="relative mt-2 mx-2 grid place-items-center rounded-lg border border-indigo-900/25 py-1 ring-2 ring-indigo-500 bg-indigo-100">
+                        <button type="button" class="absolute right-1 text-gray-400 hover:text-gray-500" />
+                        <p class="text-md font-semibold text-center text-black">BiVAECF</p>
+                    </div>
+                    <div class="relative mt-2 mx-2 grid place-items-center rounded-lg border border-indigo-900/25 py-1 ring-2 ring-indigo-500 bg-indigo-100">
+                        <button type="button" class="absolute right-1 text-gray-400 hover:text-gray-500" />
+                        <p class="text-md font-semibold text-center text-black">LightGCN</p>
+                    </div>
+                </div>
+            </div>
         </div>
         <!-- <div>
             <h2 class="mt-8 text-2xl tracking-tight font-semibold text-gray-900">Select Evaluation Period</h2>
@@ -42,16 +72,16 @@ const openModal = () => {
             </div>
         </div> -->
         <div>
-            <div class="mt-8 mb-4 col-span-12">
-                <h2 class="mt-8 text-2xl tracking-tight font-semibold text-gray-900">Feedback data from past {{ selectedDays }} days</h2>
+            <div class="mt-2 mb-2 col-span-12">
+                <h2 class="mt-2 text-2xl tracking-tight font-semibold text-gray-900">Feedback data from past {{ selectedDays }} days</h2>
             </div>
-            <div v-if="feedbackData.length" class="mt-8 max-h-96 overflow-auto overscroll-contain">
+            <div v-if="feedbackData.length" class="mt-2 max-h-96 overflow-auto overscroll-contain">
                 <p class="text-l tracking-tight text-gray-900">
                     These {{ feedbackData.length }} feedback records provided by users will be added to the evaluation.
                 </p>
 
-                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <table class="mt-2 w-full text-md text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                    <thead class="text-md text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
                         <th scope="col" class="px-6 py-3">User ID</th>
                         <th scope="col" class="px-6 py-3">Item ID</th>
@@ -78,7 +108,7 @@ const openModal = () => {
         </div>
         
         <div class="lg:grid lg:gap-4">
-            <h2 class="mt-12 text-2xl tracking-tight font-semibold text-gray-900 col-span-12">Select metrics to compute</h2>
+            <h2 class="mt-2 text-2xl tracking-tight font-semibold text-gray-900 col-span-12">Select metrics to compute</h2>
             <p class="text-l tracking-tight text-gray-900">
                 These {{ addedMetrics.length }} metrics will be added to the evaluation.
             </p>
@@ -93,7 +123,7 @@ const openModal = () => {
                             <XMarkIcon class="h-6 w-6" aria-hidden="true" />
                         </button>
                         <p class="text-xl font-semibold text-center text-white">{{ addedMetric.metric }}</p>
-                        <p v-if="addedMetric.k" class="mt-1 text-sm uppercase font-semibold text-center text-white">k={{ addedMetric.k }}</p>
+                        <p v-if="addedMetric.k" class="mt-1 text-md uppercase font-semibold text-center text-white">k={{ addedMetric.k }}</p>
                     </div>
                 </div>
                 <div class="my-2 grid grid-cols-1">
@@ -149,62 +179,19 @@ export default {
             possibleDays: [7, 14, 30, 90],
             addedMetrics: [
                 {
-                    metric: "MAE",
-                    type: "rating"
-                },
-                {
-                    metric: "RMSE",
-                    type: "rating"
-                },
-                {
-                    metric: "MSE",
-                    type: "rating"
+                    metric: "AUC",
+                    type: "ranking",
                 },
                 {
                     metric: "NDCG",
                     type: "ranking",
-                    k: 10
-                },
-                {
-                    metric: "NCRR",
-                    type: "ranking",
-                    k: 10
-                },
-                {
-                    metric: "MRR",
-                    type: "ranking", //no k
-                    k: 10
-                },
-                {
-                    metric: "HitRatio",
-                    type: "ranking",
-                    k: 10
-                },
-                {
-                    metric: "Precision",
-                    type: "ranking",
-                    k: 10
+                    k: 50
                 },
                 {
                     metric: "Recall",
                     type: "ranking",
-                    k: 10
+                    k: 50
                 },
-                {
-                    metric: "FMeasure",
-                    type: "ranking",
-                    k: 10
-                },
-                {
-                    metric: "AUC",
-                    type: "ranking", //no k
-                    k: 10
-                },
-                {
-                    metric: "MAP",
-                    type: "ranking", //no k
-                    k: 10
-                }
             ],
             isEvaluationDone: false,
             feedbackData:[
