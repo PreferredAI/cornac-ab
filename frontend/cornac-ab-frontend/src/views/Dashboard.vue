@@ -117,28 +117,34 @@ import 'v-calendar/style.css';
         </div>
 
         
-        <div class="mt-4 mb-4 col-span-1">
-            <button v-on:click="runEvaluation" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Run Evaluation Based on Below Query</button>
-        </div>
         <div class="grid grid-cols-12 bg-gray-100">
-            <div class="col-span-6 grid grid-cols-3 my-2 mx-2 bg-white rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                <p class="text-base font-semibold leading-6 text-gray-900 col-span-3">Filter by Timestamp</p>
+            <div class="col-span-6 my-2 mx-2 bg-white rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+                <p class="text-base font-semibold leading-6 text-gray-900">Filter by Timestamp</p>
 
-                <div class="mt-4">                    
+                <DatePicker v-model.range="dashboardFilters.timestamp" color="indigo" is-required>
+                    <template #default="{ inputValue, inputEvents }">
+                    <div class="mt-6">
+                        <input class="w-1/3 inline bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" :value="inputValue.start" v-on="inputEvents.start" />
+                        <ArrowRightCircleIcon class="inline mx-2 h-10 w-10 text-indigo-600" />
+                        <input class="w-1/3 inline bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" :value="inputValue.end" v-on="inputEvents.end" />
+                    </div>
+                    </template>
+                </DatePicker>
+
+                <!-- <div class="mt-4">                    
                     <DatePicker mode="date" v-model.range="dashboardFilters.timestamp" color="indigo" is-required expanded/>
                 </div>
                 <div class="col-span-3 mt-2">
                     <p class="mr-2 inline font-semibold text-indigo-600">{{ dashboardFilters.timestamp.start.toLocaleDateString() }}</p>
                     <ArrowRightCircleIcon class="inline h-6 w-6 text-indigo-600 col-span-1" />
                     <p class="ml-2 inline font-semibold text-indigo-600">{{ dashboardFilters.timestamp.end.toLocaleDateString() }}</p>
-                </div>
+                </div> -->
             </div>
             <div class="col-span-6 my-2 mx-2 bg-white rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
                 <p class="text-base font-semibold leading-6 text-gray-900 col-span-3">Filter by Model</p>
-                <div class="mt-4">
+                <div class="grid grid-cols-3 mt-4">
                     <div v-for="modelInstance in modelInstances">
-                        <button></button>
-                        <div :class="dashboardFilters.model.indexOf(modelInstance.serviceName) > -1 ? 'ring-2 ring-indigo-500 ': ''" class="relative mt-4 grid place-items-center rounded-lg border hover:bg-indigo-100 border-indigo-900/25 py-1">
+                        <div :class="dashboardFilters.model.indexOf(modelInstance.serviceName) > -1 ? 'ring-2 ring-indigo-500 bg-indigo-100': ''" class="relative mt-4 mx-2 grid place-items-center rounded-lg border hover:bg-indigo-200 border-indigo-900/25 py-1">
                             <button type="button" class="absolute right-1 text-gray-400 hover:text-gray-500" @click="filterSelected(modelInstance.serviceName)">
                                 <!-- <span class="sr-only">Remove</span> -->
                                 <!-- <XMarkIcon class="h-6 w-6" aria-hidden="true" /> -->
@@ -157,9 +163,13 @@ import 'v-calendar/style.css';
                     </div>
                 </div>
             </div>
+            <div class="mt-2 mb-4 ml-4 col-span-12">
+                <button v-on:click="runEvaluation" class="rounded-md bg-indigo-600 px-6 py-2 text-md font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Run Cornac Evaluation</button>
+            </div>
         </div>
 
-        <iframe id="feedback_iframe" src="http://0.0.0.0:5602/app/dashboards#/view/7ae59870-b90b-11ee-8517-e5d0135698f5?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'2023-12-23T07%3A22%3A52.702Z'%2Cto%3A'2024-02-21T16:00:00.000Z'))&show-time-filter=true&show-top-menu=true&hide-filter-bar=true" height="2048" width="100%"></iframe>
+        <iframe id="feedback_iframe" src="http://0.0.0.0:5602/app/dashboards#/view/7ae59870-b90b-11ee-8517-e5d0135698f5?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'2023-12-23T07%3A22%3A52.702Z'%2Cto%3A'2024-02-21T16:00:00.000Z'))&hide-filter-bar=true" height="2048" width="100%"></iframe>
+        <!-- <iframe id="feedback_iframe" src="http://0.0.0.0:5602/app/dashboards#/view/7ae59870-b90b-11ee-8517-e5d0135698f5?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'2023-12-23T07%3A22%3A52.702Z'%2Cto%3A'2024-02-21T16:00:00.000Z'))&_a=(query:(language:kuery,query:'model=BPR'))&show-time-filter=true&show-top-menu=true&hide-filter-bar=true&show-query-input=true" height="2048" width="100%"></iframe> -->
         <!-- <iframe src="http://0.0.0.0:5601/app/dashboards#/view/33b096d0-aea2-11ee-b947-3122bf2f92d4?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'2023-12-13T09%3A01%3A28.484Z'%2Cto%3A'2024-01-12T09%3A01%3A58.901Z'))&show-top-menu=true&show-time-filter=true" height="1024" width="100%"></iframe> -->
     </div>
 </template>
@@ -254,7 +264,7 @@ export default {
                     start: new Date(2023, 12, 23),
                     end: new Date(2024, 1, 11),
                 },
-                model: ["BPR"],
+                model: ["BPR", "BiVAECF", "LightGCN"],
             },
         }
     },
