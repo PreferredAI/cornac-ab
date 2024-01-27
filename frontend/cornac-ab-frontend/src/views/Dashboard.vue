@@ -118,31 +118,22 @@ import 'v-calendar/style.css';
 
         
         <div class="grid grid-cols-12 bg-gray-100">
-            <div class="col-span-6 my-2 mx-2 bg-white rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+            <div class="col-span-6 my-2 mx-2 bg-white rounded-lg border border-dashed border-gray-900/25 px-6 py-4">
                 <p class="text-base font-semibold leading-6 text-gray-900">Filter by Timestamp</p>
 
                 <DatePicker v-model.range="dashboardFilters.timestamp" color="indigo" is-required>
                     <template #default="{ inputValue, inputEvents }">
-                    <div class="mt-6">
+                    <div class="mt-2">
                         <input class="w-1/3 inline bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" :value="inputValue.start" v-on="inputEvents.start" />
                         <ArrowRightCircleIcon class="inline mx-2 h-10 w-10 text-indigo-600" />
                         <input class="w-1/3 inline bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" :value="inputValue.end" v-on="inputEvents.end" />
                     </div>
                     </template>
                 </DatePicker>
-
-                <!-- <div class="mt-4">                    
-                    <DatePicker mode="date" v-model.range="dashboardFilters.timestamp" color="indigo" is-required expanded/>
-                </div>
-                <div class="col-span-3 mt-2">
-                    <p class="mr-2 inline font-semibold text-indigo-600">{{ dashboardFilters.timestamp.start.toLocaleDateString() }}</p>
-                    <ArrowRightCircleIcon class="inline h-6 w-6 text-indigo-600 col-span-1" />
-                    <p class="ml-2 inline font-semibold text-indigo-600">{{ dashboardFilters.timestamp.end.toLocaleDateString() }}</p>
-                </div> -->
             </div>
-            <div class="col-span-6 my-2 mx-2 bg-white rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+            <div class="col-span-6 my-2 mx-2 bg-white rounded-lg border border-dashed border-gray-900/25 px-6 py-4">
                 <p class="text-base font-semibold leading-6 text-gray-900 col-span-3">Filter by Model</p>
-                <div class="grid grid-cols-3 mt-4">
+                <div class="grid grid-cols-3 mt-2">
                     <div v-for="modelInstance in modelInstances">
                         <div :class="dashboardFilters.model.indexOf(modelInstance.serviceName) > -1 ? 'ring-2 ring-indigo-500 bg-indigo-100': ''" class="relative mt-4 mx-2 grid place-items-center rounded-lg border hover:bg-indigo-200 border-indigo-900/25 py-1">
                             <button type="button" class="absolute right-1 text-gray-400 hover:text-gray-500" @click="filterSelected(modelInstance.serviceName)">
@@ -153,14 +144,6 @@ import 'v-calendar/style.css';
                         </div>
                         <!-- Active: "ring-2 ring-indigo-500" -->
                     </div>  
-                    <div class="relative max-w-sm">
-                        <!-- <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
-                            </svg>
-                        </div> -->
-                        <!-- <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date" value="All"> -->
-                    </div>
                 </div>
             </div>
             <div class="mt-2 mb-4 ml-4 col-span-12">
