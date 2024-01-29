@@ -143,22 +143,44 @@ const openModal = () => {
         </div>
     </div>
     <div v-else>
-        <div class="lg:grid lg:gap-4">
-            <div class="mt-8 mb-4 col-span-12">
+        <div class="lg:grid lg:grid-cols-2 lg:gap-4">
+            <div class="mt-8 mb-4 col-span-2">
                 <h2 class="text-2xl font-bold tracking-tight text-gray-900">Evaluation Results</h2>
             </div>
-            <div class="col-span-12">
-                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                    <thead class="text-s text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <div class="col-span-1">
+                <p class="text-lg font-semibold tracking-tight text-gray-900">
+                    Metric Results
+                </p>
+                <table class="w-full text-md text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                    <thead class="text-md text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
                             <th></th>
-                            <th v-for="(model, index) in evaluationResults.models" :key="index" scope="col" class="px-6 py-3">{{ model }}</th>
+                            <th v-for="(model, index) in evaluationResults.models" :key="index" scope="col" class="text-md px-6 py-3">{{ model }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="(metric, index) in evaluationResults.metrics" :key="index" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                            <td class="text-s font-bold text-gray-700 px-6 py-4 bg-gray-50 dark:bg-gray-700 dark:text-gray-400">{{ metric.metric }}</td>
+                            <td class="text-md font-bold text-gray-700 px-6 py-4 bg-gray-50 dark:bg-gray-700 dark:text-gray-400">{{ metric.metric }}</td>
                             <td v-for="(value, valIndex) in metric.values" :key="valIndex" class="px-6 py-4">{{ value }} </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div v-for="(tResult, tMetric, index) in evaluationResults.tResults" :key="index" class="col-span-1">
+                <p class="text-lg font-semibold tracking-tight text-gray-900">
+                    T-Test - {{ tMetric }}
+                </p>
+                <table class="w-full text-md text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                    <thead class="text-md text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th></th>
+                            <th v-for="(tValue, tKey) in tResult" :key="tKey" scope="col" class="text-md px-6 py-3">{{ tKey }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(tValue, tKey) in tResult" :key="tKey" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <td class="text-md font-bold text-gray-700 px-6 py-4 bg-gray-50 dark:bg-gray-700 dark:text-gray-400">{{ tKey }}</td>
+                            <td v-for="(value, valIndex) in tValue" :key="valIndex" class="px-6 py-4">{{ value.tValue.toFixed(4) }} <br/> (p-value = {{ value.pValue.toFixed(4) }}) </td>
                         </tr>
                     </tbody>
                 </table>
@@ -166,7 +188,7 @@ const openModal = () => {
         </div>
         <div class="mt-6 flex items-center justify-start gap-x-6 col-span-12">
             <!-- <button type="button" class="text-sm font-semibold leading-6 text-gray-900">Cancel</button> -->
-            <button v-on:click="evaluateData" type="button" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Download Evaluation to CSV</button>
+            <button v-on:click="evaluateData" type="button" class="rounded-md bg-indigo-600 px-3 py-2 text-md font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Download Evaluation to CSV</button>
         </div>
     </div>
 </template>
@@ -267,7 +289,141 @@ export default {
                         "metric": "Recall@50",
                         "values": [0.0821, 0.1117, 0.1097]
                     },
-                ]
+                ],
+                "tResults": {
+                    "AUC" : {
+                        "BPR": {
+                            "BPR": {
+                                "tValue": 0.0000,
+                                "pValue": 1.0000,
+                            },
+                            "BiVAECF": {
+                                "tValue": -52.8353,
+                                "pValue": 0.0000,
+                            },
+                            "LightGCN": {
+                                "tValue": -50.7681,
+                                "pValue": 0.0000,
+                            }
+                        },
+                        "BiVAECF": {
+                            "BPR": {
+                                "tValue": 52.8353,
+                                "pValue": 0.0000,
+                            },
+                            "BiVAECF": {
+                                "tValue": 0.0000,
+                                "pValue": 1.0000,
+                            },
+                            "LightGCN": {
+                                "tValue": 1.0878,
+                                "pValue": 0.2767,
+                            },
+                        },
+                        "LightGCN": {
+                            "BPR": {
+                                "tValue": 50.7681,
+                                "pValue": 0.0000,
+                            },
+                            "BiVAECF": {
+                                "tValue": -1.0878,
+                                "pValue": 0.2767,
+                            },
+                            "LightGCN": {
+                                "tValue": 0.0000,
+                                "pValue": 1.0000,
+                            },
+                        },
+                    },
+                    "NDCG@50" : {
+                        "BPR": {
+                            "BPR": {
+                                "tValue": 0.0000,
+                                "pValue": 1.0000,
+                            },
+                            "BiVAECF": {
+                                "tValue": -16.2271,
+                                "pValue": 0.0000,
+                            },
+                            "LightGCN": {
+                                "tValue": -14.8709,
+                                "pValue": 0.0000,
+                            }
+                        },
+                        "BiVAECF": {
+                            "BPR": {
+                                "tValue": 16.2271,
+                                "pValue": 0.0000,
+                            },
+                            "BiVAECF": {
+                                "tValue": 0.0000,
+                                "pValue": 1.0000,
+                            },
+                            "LightGCN": {
+                                "tValue": 1.6746,
+                                "pValue": 0.0940,
+                            },
+                        },
+                        "LightGCN": {
+                            "BPR": {
+                                "tValue": 14.8709,
+                                "pValue": 0.0000,
+                            },
+                            "BiVAECF": {
+                                "tValue": -1.6746,
+                                "pValue": 0.0940,
+                            },
+                            "LightGCN": {
+                                "tValue": 0.0000,
+                                "pValue": 1.0000,
+                            },
+                        },
+                    },
+                    "Recall@50" : {
+                        "BPR": {
+                            "BPR": {
+                                "tValue": 0.0000,
+                                "pValue": 1.0000,
+                            },
+                            "BiVAECF": {
+                                "tValue": -18.9934,
+                                "pValue": 0.0000,
+                            },
+                            "LightGCN": {
+                                "tValue": -18.0030,
+                                "pValue": 0.0000,
+                            }
+                        },
+                        "BiVAECF": {
+                            "BPR": {
+                                "tValue": 18.9934,
+                                "pValue": 0.0000,
+                            },
+                            "BiVAECF": {
+                                "tValue": 0.0000,
+                                "pValue": 1.0000,
+                            },
+                            "LightGCN": {
+                                "tValue": 1.1628,
+                                "pValue": 0.2449,
+                            },
+                        },
+                        "LightGCN": {
+                            "BPR": {
+                                "tValue": 18.0030,
+                                "pValue": 0.0000,
+                            },
+                            "BiVAECF": {
+                                "tValue": -1.1628,
+                                "pValue": 0.2449,
+                            },
+                            "LightGCN": {
+                                "tValue": 0.0000,
+                                "pValue": 1.0000,
+                            },
+                        },
+                    },
+                },
             },
         };
     },
