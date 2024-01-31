@@ -124,9 +124,9 @@ import 'v-calendar/style.css';
                 <DatePicker v-model.range="dashboardFilters.timestamp" color="indigo" is-required>
                     <template #default="{ inputValue, inputEvents }">
                     <div class="mt-2">
-                        <input class="w-1/3 inline bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" :value="inputValue.start" v-on="inputEvents.start" />
+                        <input class="w-1/3 inline bg-gray-50 border border-gray-300 text-gray-900 text-md text-center rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" :value="inputValue.start" v-on="inputEvents.start" />
                         <ArrowRightCircleIcon class="inline mx-2 h-10 w-10 text-indigo-600" />
-                        <input class="w-1/3 inline bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" :value="inputValue.end" v-on="inputEvents.end" />
+                        <input class="w-1/3 inline bg-gray-50 border border-gray-300 text-gray-900 text-md text-center rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" :value="inputValue.end" v-on="inputEvents.end" />
                     </div>
                     </template>
                 </DatePicker>
@@ -146,7 +146,7 @@ import 'v-calendar/style.css';
                     </div>  
                 </div>
             </div>
-            <div class="mt-2 mb-4 ml-4 col-span-12">
+            <div class="mt-2 mb-2 ml-4 col-span-12">
                 <button v-on:click="runEvaluation" class="rounded-md bg-indigo-600 px-6 py-2 text-md font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Run Cornac Evaluation</button>
             </div>
         </div>
@@ -278,7 +278,7 @@ export default {
         updateDashboard(fromDate, toDate) {
             fromDate = fromDate.toISOString();
             toDate = toDate.toISOString();
-            document.querySelector('#feedback_iframe').src = `http://0.0.0.0:5602/app/dashboards#/view/7ae59870-b90b-11ee-8517-e5d0135698f5?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'${fromDate}'%2Cto%3A'${toDate}'))&show-query-input=true&show-time-filter=true&hide-filter-bar=true`;
+            document.querySelector('#feedback_iframe').src = `http://0.0.0.0:5602/app/dashboards#/view/7ae59870-b90b-11ee-8517-e5d0135698f5?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'${fromDate}'%2Cto%3A'${toDate}'))&hide-filter-bar=true`;
         },
         filterSelected(filter) {
             alert(filter);
