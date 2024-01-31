@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
+import { setupCalendar } from 'v-calendar';
 // import './style.css'
 import './index.css'
 import App from './App.vue'
@@ -22,3 +23,5 @@ const app = createApp(App)
 
 app.use(router)
 app.mount('#app')
+
+app.use(setupCalendar, {})
