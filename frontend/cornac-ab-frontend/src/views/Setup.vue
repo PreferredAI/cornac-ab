@@ -1,7 +1,7 @@
 <template>
     <div class="container mx-auto p-4">
         <header class="bg-white shadow">
-            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+            <div class="mx-auto px-4 py-6 sm:px-6 lg:px-8">
             <h1 class="text-3xl font-bold tracking-tight text-gray-900">Environment Setup</h1>
             </div>
         </header>
