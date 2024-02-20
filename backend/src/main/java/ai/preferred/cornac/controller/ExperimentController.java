@@ -1,13 +1,11 @@
 package ai.preferred.cornac.controller;
 
+import ai.preferred.cornac.dto.CornacInstanceDto;
 import ai.preferred.cornac.entity.Experiment;
-import ai.preferred.cornac.entity.ExperimentType;
-import ai.preferred.cornac.entity.RecommendLog;
 import ai.preferred.cornac.service.ExperimentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -16,7 +14,6 @@ import java.util.List;
 public class ExperimentController {
     @Autowired
     private ExperimentService experimentService;
-
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public List<Experiment> getExperiments() {
@@ -40,6 +37,11 @@ public class ExperimentController {
 //                                          @RequestParam(name = "endDateTime") Date endDateTime,
                                           @RequestParam(name = "userSeed", defaultValue = "123") Long userSeed) {
         return experimentService.createNewExperiment(userSeed);
+    }
+
+    @RequestMapping(value = "/instance", method = RequestMethod.GET)
+    public List<CornacInstanceDto> getCornacInstances() {
+        return experimentService.getCornacInstances();
     }
 
 }

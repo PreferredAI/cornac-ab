@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -28,5 +29,15 @@ public class Experiment {
     private ExperimentStatus status;
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "experiment")
     private List<UserAbAllocation> userAbAllocation;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "experiment")
+    private List<CornacInstance> cornacInstances;
+
+    public Experiment(Timestamp startDateTime, Timestamp endDateTime, Long userSeed, ExperimentStatus status) {
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
+        this.userSeed = userSeed;
+        this.status = status;
+        this.userAbAllocation = new ArrayList<>();
+    }
 }
 
