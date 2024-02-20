@@ -1,14 +1,15 @@
 package ai.preferred.cornac.service;
 
+import ai.preferred.cornac.dto.CornacInstanceDto;
+import ai.preferred.cornac.entity.CornacInstance;
 import ai.preferred.cornac.entity.Experiment;
 import ai.preferred.cornac.entity.ExperimentStatus;
-import ai.preferred.cornac.entity.ExperimentType;
 import ai.preferred.cornac.repository.ExperimentRepository;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -24,6 +25,12 @@ public class ExperimentService {
     @Autowired
     private ExperimentRepository experimentRepository;
 
+    @Autowired
+    private RecommendService recommendService;
+
+    @Autowired
+    private CornacService cornacService;
+
     public List<Experiment> getExperiments(){
         return experimentRepository.findAll();
     }
@@ -37,11 +44,47 @@ public class ExperimentService {
         return experimentRepository.findFirstByEndDateTimeIsNull();
     }
 
+    public List<CornacInstanceDto> getCornacInstances() {
+        Experiment experiment = getCurrentExperiment();
+        if (experiment == null) {
+            return new ArrayList<>();
+        }
+        return cornacService.getCornacInstanceDtosForExperiment(experiment.getId());
+    }
+
     public Experiment createNewExperiment(Long userSeed){
         ExperimentStatus experimentStatus = ExperimentStatus.RUNNING;
         Date date = new Date();
         Timestamp startDateTime = new Timestamp(date.getTime());
-        Experiment experiment = new Experiment(null, startDateTime, null, userSeed, experimentStatus, new ArrayList<>());
+        Experiment experiment = new Experiment(startDateTime, null, userSeed, experimentStatus);
         return experimentRepository.save(experiment);
+    }
+
+    @Scheduled(fixedDelay = 60 * 10000)
+    private void checkExistingExperiment(){
+        Experiment experiment = experimentRepository.findFirstByEndDateTimeIsNull();
+        if (experiment == null) {
+            LOGGER.debug("There are no running experiments.");
+            return;
+        }
+
+        if (experiment.getCornacInstances() == null) {
+            LOGGER.debug("There are no running cornac instances.");
+            return;
+        }
+
+        for (CornacInstance cornacInstance : experiment.getCornacInstances()) {
+
+            if (!cornacService.isInstanceStillAlive(cornacInstance)) {
+                // kill the local instance, and restart it.
+                cornacService.removeCornacInstance(cornacInstance);
+
+                LOGGER.debug("Restarting Cornac instance {}", cornacInstance.getServiceName());
+
+                cornacService.startCornacInstance(cornacInstance.getServiceName(), cornacInstance.getModelClass(), experiment, true);
+
+                return;
+            }
+        }
     }
 }
