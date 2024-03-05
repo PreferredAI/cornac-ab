@@ -1,9 +1,8 @@
 package ai.preferred.cornac.service;
 
 import ai.preferred.cornac.dto.CornacInstanceDto;
-import ai.preferred.cornac.entity.CornacInstance;
-import ai.preferred.cornac.entity.Experiment;
-import ai.preferred.cornac.entity.ExperimentStatus;
+import ai.preferred.cornac.entity.*;
+import ai.preferred.cornac.repository.CornacInstanceRepository;
 import ai.preferred.cornac.repository.ExperimentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
+import org.springframework.web.ErrorResponseException;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
@@ -26,17 +30,20 @@ public class ExperimentService {
     private ExperimentRepository experimentRepository;
 
     @Autowired
-    private RecommendService recommendService;
+    private CornacService cornacService;
 
     @Autowired
-    private CornacService cornacService;
+    private FeedbackService feedbackService;
+
+    @Autowired
+    private CornacInstanceRepository cornacInstanceRepository;
 
     public List<Experiment> getExperiments(){
         return experimentRepository.findAll();
     }
 
     public Experiment getExperiment(String id){
-        return experimentRepository.findById(Long.parseLong(id))
+        return experimentRepository.findById(Integer.parseInt(id))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
@@ -52,7 +59,23 @@ public class ExperimentService {
         return cornacService.getCornacInstanceDtosForExperiment(experiment.getId());
     }
 
-    public Experiment createNewExperiment(Long userSeed){
+    @Transactional
+    public Experiment createNewExperiment(Long userSeed, List<String> modelName, List<String> modelClass, List<MultipartFile> file){
+        // 1. First create and save experiment instance
+        Experiment experiment = saveExperiment(userSeed);
+
+        // 2. Create cornac instances for each model uploaded
+        for (int i = 0; i < modelName.size(); i++) {
+            cornacService.createCornacInstance(modelName.get(i), modelClass.get(i), experiment.getId(), file.get(i));
+        }
+        // 3. Allocate users into instances and start the experiment
+        cornacService.allocateUsersToInstances(experiment);
+
+        return experiment;
+    }
+
+    @Transactional
+    public Experiment saveExperiment(Long userSeed) {
         ExperimentStatus experimentStatus = ExperimentStatus.RUNNING;
         Date date = new Date();
         Timestamp startDateTime = new Timestamp(date.getTime());
@@ -60,31 +83,89 @@ public class ExperimentService {
         return experimentRepository.save(experiment);
     }
 
-    @Scheduled(fixedDelay = 60 * 10000)
-    private void checkExistingExperiment(){
+    @Scheduled(fixedDelay = 60 * 1000)
+    public void checkExistingExperiment(){
         Experiment experiment = experimentRepository.findFirstByEndDateTimeIsNull();
         if (experiment == null) {
-            LOGGER.debug("There are no running experiments.");
+            LOGGER.info("There are no running experiments.");
             return;
         }
+
+        List<CornacInstance> cornacInstances =
+                cornacInstanceRepository.findCornacInstanceByExperimentId(experiment.getId());
 
         if (experiment.getCornacInstances() == null) {
-            LOGGER.debug("There are no running cornac instances.");
+            LOGGER.info("There are no running cornac instances.");
             return;
+        } else {
+            LOGGER.info("There are {} running cornac instances.", cornacInstances.size());
         }
 
-        for (CornacInstance cornacInstance : experiment.getCornacInstances()) {
+        for (CornacInstance cornacInstance : cornacInstances) {
 
             if (!cornacService.isInstanceStillAlive(cornacInstance)) {
                 // kill the local instance, and restart it.
-                cornacService.removeCornacInstance(cornacInstance);
+                cornacService.removeInMemoryCornacInstance(cornacInstance);
 
-                LOGGER.debug("Restarting Cornac instance {}", cornacInstance.getServiceName());
+                LOGGER.info("Restarting Cornac instance {}", cornacInstance.getServiceName());
 
                 cornacService.startCornacInstance(cornacInstance.getServiceName(), cornacInstance.getModelClass(), experiment, true);
 
                 return;
             }
         }
+    }
+
+    public List<CornacEvaluationResponse> evaluateRecommendations(EvaluationRequest evaluationRequest) {
+        // 1. Get feedbacks
+        List<Feedback> feedbacks = feedbackService.getFeedbacks(
+                evaluationRequest.getExperimentId(), evaluationRequest.getDateFrom(), evaluationRequest.getDateTo()
+        );
+        System.out.println(evaluationRequest.getExperimentId());
+        System.out.println(evaluationRequest.getDateFrom());
+        System.out.println(evaluationRequest.getDateTo());
+        System.out.println("Feedbacks: " + feedbacks.size());
+
+        if (feedbacks.isEmpty()) {
+            throw new ErrorResponseException(HttpStatus.NOT_FOUND, new RuntimeException("No feedbacks found"));
+        }
+
+        System.out.println("SAMPLE FEEDBACK ===");
+        System.out.println(feedbacks.get(0));
+
+        CornacEvaluationRequest cornacEvaluationRequest = convertToCornacEvaluationRequest(evaluationRequest, feedbacks);
+
+        // 2. Send feedbacks to the Cornac evaluation service for each model
+        List<CornacInstance> cornacInstances = cornacService.getInMemoryCornacInstances();
+
+        List<CornacEvaluationResponse> evaluationResponses = new ArrayList<>();
+
+//        CornacEvaluationResponse evaluationResponse = cornacService.postCornacInstanceEvaluation(null, cornacEvaluationRequest);
+//        evaluationResponses.add(evaluationResponse);
+
+        cornacInstances.forEach(cornacInstance -> {
+            CornacEvaluationResponse evaluationResponse = cornacService.postCornacInstanceEvaluation(cornacInstance, cornacEvaluationRequest);
+            evaluationResponses.add(evaluationResponse);
+        });
+
+        return evaluationResponses;
+    }
+
+    private CornacEvaluationRequest convertToCornacEvaluationRequest(EvaluationRequest evaluationRequest, List<Feedback> feedbacks) {
+        List<List<Object>> data = new ArrayList<>();
+        feedbacks.forEach(feedback -> {
+            List<Object> feedbackData = new ArrayList<>();
+            feedbackData.add(feedback.getUserId());
+            feedbackData.add(feedback.getItemId());
+            feedbackData.add(feedback.getRating());
+            data.add(feedbackData);
+        });
+
+        List<String> metrics = new ArrayList<>();
+        evaluationRequest.getMetrics().forEach(metricRequest -> {
+            metrics.add(metricRequest.getMetric());
+        });
+
+        return new CornacEvaluationRequest(metrics, data);
     }
 }

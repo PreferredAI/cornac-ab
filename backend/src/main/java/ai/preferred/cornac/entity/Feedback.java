@@ -3,8 +3,12 @@ package ai.preferred.cornac.entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.joda.time.DateTime;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -16,13 +20,26 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 public class Feedback {
     @Id
     private String id;
-    @Field(type = FieldType.Keyword)
+    @Field(name="experiment_id", type = FieldType.Keyword)
     private Integer experimentId;
-    @Field(type = FieldType.Keyword)
+    @Field(name="user_id", type = FieldType.Keyword)
     private String userId;
-    @Field(type = FieldType.Keyword)
+    @Field(name="book_id", type = FieldType.Keyword)
     private String itemId;
+    private String model;
     private Integer rating;
-    @Field(type = FieldType.Date)
-    private DateTime timestamp;
+    @Field(type = FieldType.Date, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSSSSS||uuuu-MM-dd'T'HH:mm:ss.SSS||uuuu-MM-dd'T'HH:mm:ss||uuuu-MM-dd", format = {})
+    private LocalDateTime timestamp;
+
+    @Override
+    public String toString() {
+        return "Feedback{" +
+                "id='" + id + '\'' +
+                ", experimentId=" + experimentId +
+                ", userId='" + userId + '\'' +
+                ", itemId='" + itemId + '\'' +
+                ", rating=" + rating +
+                ", timestamp=" + timestamp +
+                '}';
+    }
 }

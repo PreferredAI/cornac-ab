@@ -1,7 +1,6 @@
 package ai.preferred.cornac.controller;
 
 import ai.preferred.cornac.entity.Feedback;
-import ai.preferred.cornac.entity.RecommendLog;
 import ai.preferred.cornac.service.FeedbackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,23 +14,36 @@ public class FeedbackController {
     @Autowired
     private FeedbackService feedbackService;
 
-
-    @RequestMapping(value = "/", method = RequestMethod.GET)
-    public List<Feedback> getFeedbacks(@RequestParam(name = "userId", required = false) String userId,
-                                       @RequestParam(defaultValue = "itemId", required = false) String itemId) {
-        return null;
-    }
-
     @RequestMapping(value = "/experiment/{experimentId}", method = RequestMethod.GET)
-    public List<Feedback> getFeedbacks(@RequestParam(name = "experimentId", required = false) String userId) {
-        return null;
+    public List<Feedback> getFeedbacks(@PathVariable(name = "experimentId", required = false) String experimentId) {
+        return feedbackService.getFeedbacks(experimentId);
     }
 
-
-    public RecommendLog addFeedback(@RequestParam(name = "userId", required = false) String userId,
-                                    @RequestParam(defaultValue = "itemId", required = false) String itemId,
+    @RequestMapping(value = "/add", method = RequestMethod.POST)
+    public Feedback addFeedback(@RequestParam(name = "recommendId") String recommendId,
+                                    @RequestParam(defaultValue = "itemId") String itemId,
                                     @RequestParam(name = "rating") String rating) {
-        return null;
+        return feedbackService.addFeedback(recommendId, itemId, Integer.parseInt(rating));
+    }
+
+    @RequestMapping(value = "/topItems", method = RequestMethod.GET)
+    public List<String> topItems(@RequestParam(name = "experimentId") int experimentId,
+                                 @RequestParam(name = "limit") int limit) {
+        return feedbackService.getTopItems(experimentId, limit);
+    }
+
+    @RequestMapping(value = "/random", method = RequestMethod.GET)
+    public List<String> randomItems(@RequestParam(name = "limit", required = false, defaultValue = "10") int limit) {
+        return feedbackService.getRandomItems(limit);
+    }
+
+    @RequestMapping(value = "/{userId}", method = RequestMethod.POST)
+    public void submitFeedback(
+            @RequestParam String recommendId,
+            @RequestParam String itemId,
+            @RequestParam int feedback
+    ) {
+        feedbackService.addFeedback(recommendId, itemId, feedback);
     }
 
 }

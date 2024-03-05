@@ -11,11 +11,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpensearchConfig extends AbstractOpenSearchConfiguration {
 
-    private final OpensearchProperties opensearchProperties;
-
-    public OpensearchConfig(OpensearchProperties opensearchProperties) {
-        this.opensearchProperties = opensearchProperties;
-    }
+    @Autowired
+    private OpensearchProperties opensearchProperties;
 
     @Override
     @Bean

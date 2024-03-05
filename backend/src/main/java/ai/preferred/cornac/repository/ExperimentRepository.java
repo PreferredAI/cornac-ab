@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 @Repository
-public interface ExperimentRepository extends CrudRepository<Experiment, Long> {
+public interface ExperimentRepository extends CrudRepository<Experiment, Integer> {
     List<Experiment> findAll();
 
     Experiment findFirstByEndDateTimeIsNull();

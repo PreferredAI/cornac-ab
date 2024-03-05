@@ -12,7 +12,12 @@
             </svg>
         </div> -->
         <div class="flex items-center justify-center">
-            <div>
+            <div v-if="isLoading" class="animate-pulse w-full">
+                <div class="h-2 bg-slate-200 rounded"></div>
+                <div class="h-2 bg-slate-200 rounded mt-2"></div>
+                <div class="h-2 bg-slate-200 rounded mt-2"></div>
+            </div>
+            <div v-else>
                 <h4 class="text-title-md font-semibold text-black dark:text-white">
                     <slot name="header" />
                 </h4>
@@ -27,5 +32,6 @@
 <script>
 export default {
     name: 'TightCard',
+    props: ['isLoading'],
 };
 </script>

@@ -27,6 +27,7 @@ public class Experiment {
     private Timestamp endDateTime;
     private Long userSeed;
     private ExperimentStatus status;
+    private boolean isUserIndexFound;
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "experiment")
     private List<UserAbAllocation> userAbAllocation;
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "experiment")
@@ -38,6 +39,7 @@ public class Experiment {
         this.userSeed = userSeed;
         this.status = status;
         this.userAbAllocation = new ArrayList<>();
+        this.isUserIndexFound = true;
     }
 }
 
