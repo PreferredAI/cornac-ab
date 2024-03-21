@@ -1,5 +1,6 @@
 package ai.preferred.cornac.controller;
 
+import ai.preferred.cornac.entity.EvaluationResult;
 import ai.preferred.cornac.entity.Feedback;
 import ai.preferred.cornac.entity.RecommendLog;
 import ai.preferred.cornac.service.FeedbackService;

@@ -4,6 +4,7 @@ import ai.preferred.cornac.dto.CornacInstanceDto;
 import ai.preferred.cornac.entity.CornacInstance;
 import ai.preferred.cornac.entity.Experiment;
 import ai.preferred.cornac.entity.ExperimentStatus;
+import ai.preferred.cornac.repository.CornacInstanceRepository;
 import ai.preferred.cornac.repository.ExperimentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +27,9 @@ public class ExperimentService {
     private ExperimentRepository experimentRepository;
 
     @Autowired
-    private RecommendService recommendService;
-
-    @Autowired
     private CornacService cornacService;
+    @Autowired
+    private CornacInstanceRepository cornacInstanceRepository;
 
     public List<Experiment> getExperiments(){
         return experimentRepository.findAll();
@@ -64,22 +64,27 @@ public class ExperimentService {
     private void checkExistingExperiment(){
         Experiment experiment = experimentRepository.findFirstByEndDateTimeIsNull();
         if (experiment == null) {
-            LOGGER.debug("There are no running experiments.");
+            LOGGER.info("There are no running experiments.");
             return;
         }
+
+        List<CornacInstance> cornacInstances =
+                cornacInstanceRepository.findCornacInstanceByExperimentId(experiment.getId());
 
         if (experiment.getCornacInstances() == null) {
-            LOGGER.debug("There are no running cornac instances.");
+            LOGGER.info("There are no running cornac instances.");
             return;
+        } else {
+            LOGGER.info("There are {} running cornac instances.", cornacInstances.size());
         }
 
-        for (CornacInstance cornacInstance : experiment.getCornacInstances()) {
+        for (CornacInstance cornacInstance : cornacInstances) {
 
             if (!cornacService.isInstanceStillAlive(cornacInstance)) {
                 // kill the local instance, and restart it.
-                cornacService.removeCornacInstance(cornacInstance);
+                cornacService.removeInMemoryCornacInstance(cornacInstance);
 
-                LOGGER.debug("Restarting Cornac instance {}", cornacInstance.getServiceName());
+                LOGGER.info("Restarting Cornac instance {}", cornacInstance.getServiceName());
 
                 cornacService.startCornacInstance(cornacInstance.getServiceName(), cornacInstance.getModelClass(), experiment, true);
 
