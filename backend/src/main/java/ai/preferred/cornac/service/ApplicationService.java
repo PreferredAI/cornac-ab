@@ -2,8 +2,6 @@ package ai.preferred.cornac.service;
 
 import ai.preferred.cornac.entity.DemoItem;
 import ai.preferred.cornac.entity.DemoUser;
-import ai.preferred.cornac.entity.Feedback;
-import ai.preferred.cornac.entity.Recommendation;
 import ai.preferred.cornac.repository.DemoItemRepository;
 import ai.preferred.cornac.repository.DemoUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +16,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 @Service
-public class DemoService {
+public class ApplicationService {
 
     @Autowired
     private DemoUserRepository demoUserRepository;

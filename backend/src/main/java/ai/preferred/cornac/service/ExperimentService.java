@@ -1,9 +1,7 @@
 package ai.preferred.cornac.service;
 
 import ai.preferred.cornac.dto.CornacInstanceDto;
-import ai.preferred.cornac.entity.CornacInstance;
-import ai.preferred.cornac.entity.Experiment;
-import ai.preferred.cornac.entity.ExperimentStatus;
+import ai.preferred.cornac.entity.*;
 import ai.preferred.cornac.repository.CornacInstanceRepository;
 import ai.preferred.cornac.repository.ExperimentRepository;
 import org.slf4j.Logger;
@@ -15,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+import org.springframework.web.ErrorResponseException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -32,6 +31,10 @@ public class ExperimentService {
 
     @Autowired
     private CornacService cornacService;
+
+    @Autowired
+    private FeedbackService feedbackService;
+
     @Autowired
     private CornacInstanceRepository cornacInstanceRepository;
 
@@ -111,5 +114,58 @@ public class ExperimentService {
                 return;
             }
         }
+    }
+
+    public List<CornacEvaluationResponse> evaluateRecommendations(EvaluationRequest evaluationRequest) {
+        // 1. Get feedbacks
+        List<Feedback> feedbacks = feedbackService.getFeedbacks(
+                evaluationRequest.getExperimentId(), evaluationRequest.getDateFrom(), evaluationRequest.getDateTo()
+        );
+        System.out.println(evaluationRequest.getExperimentId());
+        System.out.println(evaluationRequest.getDateFrom());
+        System.out.println(evaluationRequest.getDateTo());
+        System.out.println("Feedbacks: " + feedbacks.size());
+
+        if (feedbacks.isEmpty()) {
+            throw new ErrorResponseException(HttpStatus.NOT_FOUND, new RuntimeException("No feedbacks found"));
+        }
+
+        System.out.println("SAMPLE FEEDBACK ===");
+        System.out.println(feedbacks.get(0));
+
+        CornacEvaluationRequest cornacEvaluationRequest = convertToCornacEvaluationRequest(evaluationRequest, feedbacks);
+
+        // 2. Send feedbacks to the Cornac evaluation service for each model
+        List<CornacInstance> cornacInstances = cornacService.getInMemoryCornacInstances();
+
+        List<CornacEvaluationResponse> evaluationResponses = new ArrayList<>();
+
+//        CornacEvaluationResponse evaluationResponse = cornacService.postCornacInstanceEvaluation(null, cornacEvaluationRequest);
+//        evaluationResponses.add(evaluationResponse);
+
+        cornacInstances.forEach(cornacInstance -> {
+            CornacEvaluationResponse evaluationResponse = cornacService.postCornacInstanceEvaluation(cornacInstance, cornacEvaluationRequest);
+            evaluationResponses.add(evaluationResponse);
+        });
+
+        return evaluationResponses;
+    }
+
+    private CornacEvaluationRequest convertToCornacEvaluationRequest(EvaluationRequest evaluationRequest, List<Feedback> feedbacks) {
+        List<List<Object>> data = new ArrayList<>();
+        feedbacks.forEach(feedback -> {
+            List<Object> feedbackData = new ArrayList<>();
+            feedbackData.add(feedback.getUserId());
+            feedbackData.add(feedback.getItemId());
+            feedbackData.add(feedback.getRating());
+            data.add(feedbackData);
+        });
+
+        List<String> metrics = new ArrayList<>();
+        evaluationRequest.getMetrics().forEach(metricRequest -> {
+            metrics.add(metricRequest.getMetric());
+        });
+
+        return new CornacEvaluationRequest(metrics, data);
     }
 }

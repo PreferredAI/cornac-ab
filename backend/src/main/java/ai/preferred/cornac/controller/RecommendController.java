@@ -21,22 +21,6 @@ public class RecommendController {
     @Autowired
     private RecommendService recommendService;
 
-    @Autowired
-    private CornacService cornacService;
-
-
-//    @Transactional
-//    @RequestMapping(value = "/instance", method = RequestMethod.POST)
-//    public CornacInstanceDto createCornacInstance(
-//            @RequestParam(name = "name", defaultValue = "model") String name,
-//            @RequestParam(name = "modelClass") String modelClass,
-//            @RequestParam(name = "experimentId") Integer experimentId,
-//            @RequestParam("file") MultipartFile file) {
-//        System.out.println(name);
-//        System.out.println(modelClass);
-//        System.out.println(file.getName());
-//        return cornacService.createCornacInstance(name, modelClass, experimentId, file);
-//    }
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public RecommendLogDto getRecommendations(
@@ -46,10 +30,6 @@ public class RecommendController {
         return recommendService.getRecommendations(userId, k);
     }
 
-    @RequestMapping(value = "/evaluate", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<CornacEvaluationResponse> getEvaluationResult(@RequestBody EvaluationRequest request) {
-        return recommendService.evaluateRecommendations(request);
-    }
 //    public List<EvaluationResponse> getEvaluationResult(@RequestParam(name = "metrics") List<MetricRequest> metrics,
 //                                                        @RequestParam(name = "experimentId") String experimentId,
 //                                                        @RequestParam(name = "dateFrom") DateTime dateFrom,

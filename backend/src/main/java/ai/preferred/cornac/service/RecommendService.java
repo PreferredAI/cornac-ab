@@ -39,8 +39,6 @@ public class RecommendService {
 
     @Autowired
     private ModelMapper modelMapper;
-    @Autowired
-    private CornacInstanceRepository cornacInstanceRepository;
 
     private Integer getAbInstanceGroup(Experiment experiment, String userId){
         if (experiment.isUserIndexFound()) {
@@ -140,58 +138,9 @@ public class RecommendService {
         return modelMapper.map(recommendLog, RecommendLogDto.class);
     }
 
-    public List<CornacEvaluationResponse> evaluateRecommendations(EvaluationRequest evaluationRequest) {
-        // 1. Get feedbacks
-        List<Feedback> feedbacks = feedbackService.getFeedbacks(
-                evaluationRequest.getExperimentId(), evaluationRequest.getDateFrom(), evaluationRequest.getDateTo()
-        );
-        System.out.println(evaluationRequest.getExperimentId());
-        System.out.println(evaluationRequest.getDateFrom());
-        System.out.println(evaluationRequest.getDateTo());
-        System.out.println("Feedbacks: " + feedbacks.size());
 
-        if (feedbacks.isEmpty()) {
-            throw new ErrorResponseException(HttpStatus.NOT_FOUND, new RuntimeException("No feedbacks found"));
-        }
 
-        System.out.println("SAMPLE FEEDBACK ===");
-        System.out.println(feedbacks.get(0));
 
-        CornacEvaluationRequest cornacEvaluationRequest = convertToCornacEvaluationRequest(evaluationRequest, feedbacks);
-
-        // 2. Send feedbacks to the Cornac evaluation service for each model
-        List<CornacInstance> cornacInstances = cornacService.getInMemoryCornacInstances();
-
-        List<CornacEvaluationResponse> evaluationResponses = new ArrayList<>();
-
-//        CornacEvaluationResponse evaluationResponse = cornacService.postCornacInstanceEvaluation(null, cornacEvaluationRequest);
-//        evaluationResponses.add(evaluationResponse);
-
-        cornacInstances.forEach(cornacInstance -> {
-            CornacEvaluationResponse evaluationResponse = cornacService.postCornacInstanceEvaluation(cornacInstance, cornacEvaluationRequest);
-            evaluationResponses.add(evaluationResponse);
-        });
-
-        return evaluationResponses;
-    }
-
-    private CornacEvaluationRequest convertToCornacEvaluationRequest(EvaluationRequest evaluationRequest, List<Feedback> feedbacks) {
-        List<List<Object>> data = new ArrayList<>();
-        feedbacks.forEach(feedback -> {
-            List<Object> feedbackData = new ArrayList<>();
-            feedbackData.add(feedback.getUserId());
-            feedbackData.add(feedback.getItemId());
-            feedbackData.add(feedback.getRating());
-            data.add(feedbackData);
-        });
-
-        List<String> metrics = new ArrayList<>();
-        evaluationRequest.getMetrics().forEach(metricRequest -> {
-            metrics.add(metricRequest.getMetric());
-        });
-
-        return new CornacEvaluationRequest(metrics, data);
-    }
 
     @PreDestroy
     public void destroy(){

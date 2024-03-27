@@ -37,4 +37,13 @@ public class FeedbackController {
         return feedbackService.getRandomItems(limit);
     }
 
+    @RequestMapping(value = "/{userId}", method = RequestMethod.POST)
+    public void submitFeedback(
+            @RequestParam String recommendId,
+            @RequestParam String itemId,
+            @RequestParam int feedback
+    ) {
+        feedbackService.addFeedback(recommendId, itemId, feedback);
+    }
+
 }
