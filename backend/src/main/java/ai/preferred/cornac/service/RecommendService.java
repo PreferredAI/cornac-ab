@@ -43,6 +43,23 @@ public class RecommendService {
     private CornacInstanceRepository cornacInstanceRepository;
 
     private Integer getAbInstanceGroup(Experiment experiment, String userId){
+        if (experiment.isUserIndexFound()) {
+            return getPreassignedAbInstance(experiment, userId);
+        } else {
+            return getAbInstanceOnTheFly(experiment, userId);
+        }
+    }
+
+    private Integer getPreassignedAbInstance(Experiment experiment, String userId) {
+        UserAbAllocation userAbAllocation = userAbAllocationRepository.findByExperimentIdAndUserId(experiment.getId(), userId);
+        if (userAbAllocation == null) {
+            return -1;
+        } else {
+            return userAbAllocation.getAbGroup();
+        }
+    }
+
+    private Integer getAbInstanceOnTheFly(Experiment experiment, String userId) {
         Integer experimentId = experiment.getId();
 
         int numInstances = cornacService.getCornacInstancesForExperiment(experimentId).size();
@@ -59,7 +76,7 @@ public class RecommendService {
             int abGroup = randInt % numInstances;
             userAbAllocationRepository.save(new UserAbAllocation(null, userId, abGroup, experiment));
             return abGroup;
-        }
+        } // if its not null, it has been previously allocated and cached in db
 
         return userAbAllocation.getAbGroup();
     }
@@ -79,20 +96,37 @@ public class RecommendService {
 
 //        CornacInstance cornacInstance = cornacService.getCornacInstancesForExperiment(experiment.getId()).get(chosenInstance);
         List<CornacInstance> cornacInstances = cornacService.getInMemoryCornacInstances();
-        CornacInstance cornacInstance = cornacInstances.get(chosenInstance);
 
+        CornacInstance cornacInstance;
+        try {
+            cornacInstance = cornacInstances.get(chosenInstance);
+        } catch (ArrayIndexOutOfBoundsException e){
+            LOGGER.warn("Cornac instance not found, applying fallback solution.");
+            cornacInstance = null;
+        }
+
+        RecommendLog log = new RecommendLog();
         Recommendation recommendation;
         try{
             recommendation = cornacService.getApiRecommendation(cornacInstance, userId, k);
         } catch (Exception e){
-            e.printStackTrace();
-            System.out.println(e.getCause());
-            System.out.println(e.getMessage());
-            System.out.println(e.getLocalizedMessage());
-            throw e;
+            LOGGER.error("Error occurred while getting recommendations", e);
+            LOGGER.warn("Applying fallback solution, getting top items.");
+            int top_k = Integer.parseInt(k);
+            List<String> resultIds = feedbackService.getTopItems(experiment.getId(), top_k);
+
+            log.setFallback(true);
+            log.setFallbackReason("exception");
+
+            if (resultIds.size() < top_k){
+                LOGGER.warn("Not enough top items found, getting random items.");
+                resultIds = feedbackService.getRandomItems(top_k);
+                log.setFallbackReason("not_enough_top_items");
+            }
+
+            recommendation = new Recommendation(resultIds, new RecommendationQuery(userId, k, false));
         }
 
-        RecommendLog log = new RecommendLog();
         log.setExperimentId(experiment.getId());
         log.setUserId(userId);
         log.setTimestamp(LocalDateTime.now());

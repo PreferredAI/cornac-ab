@@ -25,5 +25,4 @@ public interface FeedbackRepository extends CrudRepository<Feedback, String> {
     Page<Feedback> findAllByExperimentIdAndTimestampAfterAndTimestampBefore(String experimentId, LocalDateTime timestampAfter, LocalDateTime timestampBefore, Pageable pageable);
 //    Stream<Feedback> findAllByExperimentIdAndTimestampAfterAndTimestampBefore(String experimentId, LocalDateTime timestampAfter, LocalDateTime timestampBefore);
     Stream<Feedback> findAllByExperimentIdAndTimestampGreaterThanEqualAndTimestampLessThanEqual(String experimentId, LocalDateTime timestampAfter, LocalDateTime timestampBefore);
-
 }

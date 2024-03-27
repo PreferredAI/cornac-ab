@@ -28,4 +28,7 @@ public class RecommendLog {
     private LocalDateTime timestamp;
     @Field(type = FieldType.Keyword)
     private List<String> recommendations;
+
+    private boolean isFallback;
+    private String fallbackReason;
 }

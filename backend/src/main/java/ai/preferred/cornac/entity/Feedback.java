@@ -26,6 +26,7 @@ public class Feedback {
     private String userId;
     @Field(name="book_id", type = FieldType.Keyword)
     private String itemId;
+    private String model;
     private Integer rating;
     @Field(type = FieldType.Date, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSSSSS||uuuu-MM-dd'T'HH:mm:ss.SSS||uuuu-MM-dd'T'HH:mm:ss||uuuu-MM-dd", format = {})
     private LocalDateTime timestamp;

@@ -5,6 +5,7 @@ import ai.preferred.cornac.entity.Experiment;
 import ai.preferred.cornac.service.ExperimentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -35,8 +36,11 @@ public class ExperimentController {
 //                                            @RequestParam(name = "type") ExperimentType type,
 //                                          @RequestParam(name = "startDateTime") Date startDateTime,
 //                                          @RequestParam(name = "endDateTime") Date endDateTime,
-                                          @RequestParam(name = "userSeed", defaultValue = "123") Long userSeed) {
-        return experimentService.createNewExperiment(userSeed);
+                                          @RequestParam(name = "userSeed", defaultValue = "123") Long userSeed,
+                                          @RequestParam(name = "name", defaultValue = "model") List<String> modelName,
+                                          @RequestParam(name = "modelClass") List<String> modelClass,
+                                          @RequestParam("file") List<MultipartFile> file) {
+        return experimentService.createNewExperiment(userSeed, modelName, modelClass, file);
     }
 
     @RequestMapping(value = "/instance", method = RequestMethod.GET)

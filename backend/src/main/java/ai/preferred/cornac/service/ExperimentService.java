@@ -12,6 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
@@ -36,7 +40,7 @@ public class ExperimentService {
     }
 
     public Experiment getExperiment(String id){
-        return experimentRepository.findById(Long.parseLong(id))
+        return experimentRepository.findById(Integer.parseInt(id))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
@@ -52,7 +56,23 @@ public class ExperimentService {
         return cornacService.getCornacInstanceDtosForExperiment(experiment.getId());
     }
 
-    public Experiment createNewExperiment(Long userSeed){
+    @Transactional
+    public Experiment createNewExperiment(Long userSeed, List<String> modelName, List<String> modelClass, List<MultipartFile> file){
+        // 1. First create and save experiment instance
+        Experiment experiment = saveExperiment(userSeed);
+
+        // 2. Create cornac instances for each model uploaded
+        for (int i = 0; i < modelName.size(); i++) {
+            cornacService.createCornacInstance(modelName.get(i), modelClass.get(i), experiment.getId(), file.get(i));
+        }
+        // 3. Allocate users into instances and start the experiment
+        cornacService.allocateUsersToInstances(experiment);
+
+        return experiment;
+    }
+
+    @Transactional
+    public Experiment saveExperiment(Long userSeed) {
         ExperimentStatus experimentStatus = ExperimentStatus.RUNNING;
         Date date = new Date();
         Timestamp startDateTime = new Timestamp(date.getTime());
@@ -60,8 +80,8 @@ public class ExperimentService {
         return experimentRepository.save(experiment);
     }
 
-    @Scheduled(fixedDelay = 60 * 10000)
-    private void checkExistingExperiment(){
+    @Scheduled(fixedDelay = 60 * 1000)
+    public void checkExistingExperiment(){
         Experiment experiment = experimentRepository.findFirstByEndDateTimeIsNull();
         if (experiment == null) {
             LOGGER.info("There are no running experiments.");

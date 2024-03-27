@@ -7,6 +7,7 @@ import ai.preferred.cornac.service.RecommendService;
 import ai.preferred.cornac.service.CornacService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,17 +25,18 @@ public class RecommendController {
     private CornacService cornacService;
 
 
-    @RequestMapping(value = "/instance", method = RequestMethod.POST)
-    public CornacInstanceDto createCornacInstance(
-            @RequestParam(name = "name", defaultValue = "model") String name,
-            @RequestParam(name = "modelClass") String modelClass,
-            @RequestParam(name = "experimentId") Long experimentId,
-            @RequestParam("file") MultipartFile file) {
-        System.out.println(name);
-        System.out.println(modelClass);
-        System.out.println(file.getName());
-        return cornacService.createCornacInstance(name, modelClass, experimentId, file);
-    }
+//    @Transactional
+//    @RequestMapping(value = "/instance", method = RequestMethod.POST)
+//    public CornacInstanceDto createCornacInstance(
+//            @RequestParam(name = "name", defaultValue = "model") String name,
+//            @RequestParam(name = "modelClass") String modelClass,
+//            @RequestParam(name = "experimentId") Integer experimentId,
+//            @RequestParam("file") MultipartFile file) {
+//        System.out.println(name);
+//        System.out.println(modelClass);
+//        System.out.println(file.getName());
+//        return cornacService.createCornacInstance(name, modelClass, experimentId, file);
+//    }
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public RecommendLogDto getRecommendations(
@@ -56,9 +58,9 @@ public class RecommendController {
 //        return recommendService.evaluateRecommendations(metrics, experimentId, dateFrom, dateTo);
 //    }
 
-    @RequestMapping(value = "/instance", method = RequestMethod.GET)
-    public List<CornacInstance> getCornacInstances() {
-        return cornacService.getInMemoryCornacInstances();
-    }
+//    @RequestMapping(value = "/instance", method = RequestMethod.GET)
+//    public List<CornacInstanceDto> getCornacInstances() {
+//        return cornacService.getInMemoryCornacInstances();
+//    }
 
 }

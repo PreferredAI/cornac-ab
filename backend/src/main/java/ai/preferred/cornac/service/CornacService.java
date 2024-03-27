@@ -3,7 +3,9 @@ package ai.preferred.cornac.service;
 import ai.preferred.cornac.dto.CornacInstanceDto;
 import ai.preferred.cornac.entity.*;
 import ai.preferred.cornac.repository.CornacInstanceRepository;
+import ai.preferred.cornac.repository.DemoUserRepository;
 import ai.preferred.cornac.repository.ExperimentRepository;
+import ai.preferred.cornac.repository.UserAbAllocationRepository;
 import ai.preferred.cornac.util.FileUtil;
 import io.netty.handler.logging.LogLevel;
 import org.modelmapper.ModelMapper;
@@ -15,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -33,12 +36,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class CornacService {
@@ -53,7 +54,13 @@ public class CornacService {
     @Autowired
     private ExperimentRepository experimentRepository;
 
-    public CornacInstanceDto createCornacInstance(String name, String modelClass, Long experimentId, MultipartFile file) {
+    @Autowired
+    private DemoUserRepository demoUserRepository;
+    @Autowired
+    private UserAbAllocationRepository userAbAllocationRepository;
+
+    @Transactional
+    public CornacInstanceDto createCornacInstance(String name, String modelClass, Integer experimentId, MultipartFile file) {
 
         boolean isWindows = System.getProperty("os.name")
                 .toLowerCase()
@@ -87,6 +94,7 @@ public class CornacService {
         return startCornacInstance(name, modelClass, experiment, false);
     }
 
+    @Transactional
     public CornacInstanceDto startCornacInstance(String name, String modelClass, Experiment experiment, boolean isRestart) {
 
         boolean isWindows = System.getProperty("os.name")
@@ -192,7 +200,8 @@ public class CornacService {
 //        return cornacInstance;
 //    }
 
-    private CornacInstance addCornacInstance(String name, String modelClass, Integer port, Experiment experiment, Process process, boolean isRestart) {
+    @Transactional
+    public CornacInstance addCornacInstance(String name, String modelClass, Integer port, Experiment experiment, Process process, boolean isRestart) {
 //        WebClient webClient = WebClient.create(
 //                String.format("http://localhost:%d/", port)
 //        );
@@ -229,6 +238,51 @@ public class CornacService {
         return cornacInstance;
     }
 
+    @Transactional
+    public boolean allocateUsersToInstances(Experiment experiment) {
+        List<CornacInstance> cornacInstances = getCornacInstancesForExperiment(experiment.getId());
+        if (cornacInstances.isEmpty()){
+            throw new ErrorResponseException(HttpStatus.BAD_REQUEST,
+                    new RuntimeException("No cornac instances found for experiment.")
+            );
+        }
+
+        List<DemoUser> users = getUsers();
+
+        if (users.isEmpty()){
+            experiment.setUserIndexFound(false);
+            experimentRepository.save(experiment);
+        }
+
+        List<UserAbAllocation> userAbAllocations = new ArrayList<>();
+
+        Long randomSeed = experiment.getUserSeed();
+        int numInstances = cornacInstances.size();
+
+        for (DemoUser user : users) {
+            String userId = user.getUserId();
+
+            UserAbAllocation userAbAllocation = new UserAbAllocation();
+            userAbAllocation.setUserId(userId);
+            userAbAllocation.setAbGroup(getAbInstanceGroup(numInstances, randomSeed, userId));
+            userAbAllocation.setExperiment(experiment);
+
+            userAbAllocations.add(userAbAllocation);
+        }
+
+        userAbAllocationRepository.saveAll(userAbAllocations);
+
+        return true;
+    }
+
+    public List<DemoUser> getUsers(){
+        List<DemoUser> users = new ArrayList<>();
+        try (Stream<DemoUser> userStream = demoUserRepository.findAllBy()){
+            users.addAll(userStream.toList());
+        }
+        return users;
+    }
+
     public boolean isInstanceStillAlive (CornacInstance cornacInstance) {
         if (!inMemoryCornacInstances.contains(cornacInstance)){
             return false;
@@ -263,6 +317,9 @@ public class CornacService {
     }
 
     public Recommendation getApiRecommendation(CornacInstance cornacInstance, String userId, String k) {
+        if (cornacInstance == null){
+            // get most popular products
+        }
         WebClient webClient = cornacInstance.getWebClient();
         return webClient
                 .get()
@@ -298,6 +355,16 @@ public class CornacService {
                 .retrieve()
                 .bodyToMono(CornacEvaluationResponse.class)
                 .block();
+    }
+
+    private Integer getAbInstanceGroup(Integer numInstances, Long randomSeed, String userId){
+        // allocate an ab-testing group
+        // - abGroup is a random number between 0 and numInstances
+        // - this is a deterministic random operation.
+        // - This will give the same instance on the same seed for the same user.
+        Random rand = new Random(randomSeed);
+        int randInt = rand.nextInt(userId.hashCode());
+        return randInt % numInstances;
     }
 
 
