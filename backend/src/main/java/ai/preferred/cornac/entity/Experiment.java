@@ -1,5 +1,6 @@
 package ai.preferred.cornac.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,8 +29,10 @@ public class Experiment {
     private Long userSeed;
     private ExperimentStatus status;
     private boolean isUserIndexFound;
+    @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "experiment")
     private List<UserAbAllocation> userAbAllocation;
+    @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "experiment")
     private List<CornacInstance> cornacInstances;
 

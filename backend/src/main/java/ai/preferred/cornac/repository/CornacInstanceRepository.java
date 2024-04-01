@@ -5,7 +5,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface CornacInstanceRepository extends CrudRepository<CornacInstance, Long> {
+public interface CornacInstanceRepository extends CrudRepository<CornacInstance, Integer> {
     List<CornacInstance> findCornacInstanceByExperimentId(Integer experimentId);
     CornacInstance findCornacInstanceByServiceNameAndModelClassAndExperimentId(String serviceName, String modelClass, Integer experimentId);
 

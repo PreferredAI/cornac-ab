@@ -1,9 +1,12 @@
 package ai.preferred.cornac.service;
 
 import ai.preferred.cornac.dto.CornacInstanceDto;
+import ai.preferred.cornac.dto.ExperimentDto;
 import ai.preferred.cornac.entity.*;
 import ai.preferred.cornac.repository.CornacInstanceRepository;
 import ai.preferred.cornac.repository.ExperimentRepository;
+import ai.preferred.cornac.util.TtestUtil;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class ExperimentService {
@@ -38,6 +39,12 @@ public class ExperimentService {
     @Autowired
     private CornacInstanceRepository cornacInstanceRepository;
 
+    @Autowired
+    private TtestUtil ttestUtil;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
     public List<Experiment> getExperiments(){
         return experimentRepository.findAll();
     }
@@ -47,7 +54,11 @@ public class ExperimentService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    public Experiment getCurrentExperiment(){
+    public ExperimentDto getActiveExperiment(){
+        return modelMapper.map(getCurrentExperiment(), ExperimentDto.class);
+    }
+
+    public Experiment getCurrentExperiment() {
         return experimentRepository.findFirstByEndDateTimeIsNull();
     }
 
@@ -116,7 +127,7 @@ public class ExperimentService {
         }
     }
 
-    public List<CornacEvaluationResponse> evaluateRecommendations(EvaluationRequest evaluationRequest) {
+    public EvaluationResult evaluateRecommendations(EvaluationRequest evaluationRequest) {
         // 1. Get feedbacks
         List<Feedback> feedbacks = feedbackService.getFeedbacks(
                 evaluationRequest.getExperimentId(), evaluationRequest.getDateFrom(), evaluationRequest.getDateTo()
@@ -138,17 +149,77 @@ public class ExperimentService {
         // 2. Send feedbacks to the Cornac evaluation service for each model
         List<CornacInstance> cornacInstances = cornacService.getInMemoryCornacInstances();
 
-        List<CornacEvaluationResponse> evaluationResponses = new ArrayList<>();
+//        List<CornacEvaluationResponse> evaluationResponses = new ArrayList<>();
 
 //        CornacEvaluationResponse evaluationResponse = cornacService.postCornacInstanceEvaluation(null, cornacEvaluationRequest);
 //        evaluationResponses.add(evaluationResponse);
 
+        Map<String, CornacEvaluationResponse> modelNameToEvalResponse = new HashMap<>();
+        List<String> metrics = new ArrayList<>();
+
         cornacInstances.forEach(cornacInstance -> {
             CornacEvaluationResponse evaluationResponse = cornacService.postCornacInstanceEvaluation(cornacInstance, cornacEvaluationRequest);
-            evaluationResponses.add(evaluationResponse);
+            modelNameToEvalResponse.put(cornacInstance.getServiceName(), evaluationResponse);
+
+            if (metrics.isEmpty()) {
+                evaluationResponse.getResult().forEach((metric, userResult) -> {
+                    metrics.add(metric);
+                });
+            }
         });
 
-        return evaluationResponses;
+        // 3. Calculate T-test and p-value for each model pair
+        List<TResult> tResultList = new ArrayList<>();
+
+        for (String metric : metrics) {
+            Map<String, TModelResult> modelToTModelResult = new HashMap<>();
+
+            for (CornacInstance fromInstance : cornacInstances) {
+                String fromModel = fromInstance.getServiceName();
+                CornacEvaluationResponse fromEvaluationResponse = modelNameToEvalResponse.get(fromModel);
+                Map<String, Double> fromUserResults = fromEvaluationResponse.getUserResult().get(metric);
+                List<Double> fromValues = fromUserResults.values().stream().toList();
+
+                for (CornacInstance toInstance : cornacInstances) {
+                    String toModel = toInstance.getServiceName();
+                    CornacEvaluationResponse toEvaluationResponse = modelNameToEvalResponse.get(toInstance.getServiceName());
+                    Map<String, Double> toUserResults = toEvaluationResponse.getUserResult().get(metric);
+                    List<Double> toValues = toUserResults.values().stream().toList();
+
+                    double tVal = calculateTTest(fromValues.stream().mapToDouble(Double::doubleValue).toArray(),
+                            toValues.stream().mapToDouble(Double::doubleValue).toArray());
+                    double pVal = calculatePValue(fromValues.stream().mapToDouble(Double::doubleValue).toArray(),
+                            toValues.stream().mapToDouble(Double::doubleValue).toArray());
+
+                    PValue pValue = new PValue(tVal, pVal);
+
+                    TModelResult tModelResult;
+                    if (modelToTModelResult.containsKey(fromModel)) {
+                        tModelResult = modelToTModelResult.get(fromModel);
+                    } else {
+                        tModelResult = new TModelResult();
+                        tModelResult.setModel(fromModel);
+                        tModelResult.setToModelPValues(new HashMap<>());
+                    }
+                    tModelResult.getToModelPValues().put(toModel, pValue);
+                    modelToTModelResult.put(fromModel, tModelResult);
+                }
+            }
+            tResultList.add(new TResult(metric, new ArrayList<>(modelToTModelResult.values())));
+        }
+
+        EvaluationResult evaluationResult = new EvaluationResult();
+        evaluationResult.setMetrics(metrics);
+
+        List<MetricResult> metricResults = new ArrayList<>();
+        modelNameToEvalResponse.forEach((model, evalResponse) -> {
+            metricResults.add(new MetricResult(model, evalResponse.getResult()));
+        });
+
+        evaluationResult.setModelMetricResults(metricResults);
+        evaluationResult.setTResults(tResultList);
+
+        return evaluationResult;
     }
 
     private CornacEvaluationRequest convertToCornacEvaluationRequest(EvaluationRequest evaluationRequest, List<Feedback> feedbacks) {
@@ -167,5 +238,13 @@ public class ExperimentService {
         });
 
         return new CornacEvaluationRequest(metrics, data);
+    }
+
+    public Double calculateTTest(double[] a, double[] b) {
+        return ttestUtil.pairedTTest(a, b);
+    }
+
+    public Double calculatePValue(double[] a, double[] b) {
+        return ttestUtil.pairedPvalue(a, b);
     }
 }

@@ -148,7 +148,7 @@ public class RecommendService {
         cornacService.getInMemoryCornacInstances().forEach(cornacInstance -> {
             cornacInstance.getProcess().destroy();
 //            cornacInstance.setStopped(true);
-//            cornacInstanceRepository.save(cornacInstance);
+            cornacService.updateCornacInstanceStatus(cornacInstance.getId(), "suspended");
         });
 
     }
