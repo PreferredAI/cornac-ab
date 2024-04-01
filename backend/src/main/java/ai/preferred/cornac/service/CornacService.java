@@ -229,6 +229,7 @@ public class CornacService {
             cornacInstance.setProcess(process);
             cornacInstance.setPort(port);
             cornacInstance.setWebClient(webClient);
+            cornacInstance.setStatus("running");
         } else {
             cornacInstance = new CornacInstance(name, modelClass, port, experiment, process, webClient);
         }
@@ -365,6 +366,13 @@ public class CornacService {
         Random rand = new Random(randomSeed);
         int randInt = rand.nextInt(userId.hashCode());
         return randInt % numInstances;
+    }
+
+    public boolean updateCornacInstanceStatus(Integer id, String status) {
+        CornacInstance cornacInstance = cornacInstanceRepository.findById(id).get();
+        cornacInstance.setStatus(status);
+        cornacInstanceRepository.save(cornacInstance);
+        return true;
     }
 
 

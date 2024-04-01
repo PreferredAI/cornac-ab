@@ -27,7 +27,7 @@ public class CornacInstance {
     private Process process;
     @Transient
     private WebClient webClient;
-    private boolean isStopped = false;
+    private String status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "experiment_id")
@@ -40,6 +40,7 @@ public class CornacInstance {
         this.experiment = experiment;
         this.process = process;
         this.webClient = webClient;
+        this.status = "running";
     }
 
     @Override

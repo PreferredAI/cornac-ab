@@ -1,8 +1,10 @@
 package ai.preferred.cornac.controller;
 
 import ai.preferred.cornac.dto.CornacInstanceDto;
+import ai.preferred.cornac.dto.ExperimentDto;
 import ai.preferred.cornac.entity.CornacEvaluationResponse;
 import ai.preferred.cornac.entity.EvaluationRequest;
+import ai.preferred.cornac.entity.EvaluationResult;
 import ai.preferred.cornac.entity.Experiment;
 import ai.preferred.cornac.service.ExperimentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +27,8 @@ public class ExperimentController {
     }
 
     @RequestMapping(value = "/active", method = RequestMethod.GET)
-    public Experiment getActiveExperiment() {
-        return experimentService.getCurrentExperiment();
+    public ExperimentDto getActiveExperiment() {
+        return experimentService.getActiveExperiment();
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
@@ -52,7 +54,12 @@ public class ExperimentController {
     }
 
     @RequestMapping(value = "/evaluate", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<CornacEvaluationResponse> getEvaluationResult(@RequestBody EvaluationRequest request) {
+    public EvaluationResult getEvaluationResult(@RequestBody EvaluationRequest request) {
         return experimentService.evaluateRecommendations(request);
+    }
+
+    @RequestMapping(value = "/ttest", method = RequestMethod.GET)
+    public Double doTTest(@RequestParam(name = "a") double[] a, @RequestParam(name = "b") double[] b) {
+        return experimentService.calculateTTest(a, b);
     }
 }

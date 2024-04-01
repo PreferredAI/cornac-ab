@@ -5,11 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class TResult {
     private String metric;
-    private TModelResult modelComparison;
+    private List<TModelResult> modelComparison;
 }
