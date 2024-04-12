@@ -23,7 +23,7 @@ const modal = ref(null);
             </div>
           </div>
           <div class="mx-auto max-w-2xl px-4 py-4 sm:px-6 lg:max-w-7xl lg:px-8">
-            <BookDetailsModal ref="modal" :book="selectedBook" />
+            <BookDetailsModal v-if="data" ref="modal" :book="selectedBook" :recommendationId="data.recommendationId"/>
             <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Books Recommended for you</h2>
             <p class="mt-4 text-gray-500">These books are specially curated and recommended. Click on any of these books to view more about them.</p>
             <div v-if="loading" class="mt-8">
@@ -133,7 +133,7 @@ export default {
       openModal(itemSelected) {
         // do API call to track book click (feedback)
         this.modalLoading = true;
-        postFeedback(this.data.recommendationId, itemSelected.itemId, 1).then((response) => {
+        postFeedback(this.data.recommendationId, itemSelected.itemId, 1, "click").then((response) => {
           this.modalLoading = false;
           this.selectedBook = itemSelected;
           this.$refs.modal.open();
