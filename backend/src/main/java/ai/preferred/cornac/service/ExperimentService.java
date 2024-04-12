@@ -2,6 +2,7 @@ package ai.preferred.cornac.service;
 
 import ai.preferred.cornac.dto.CornacInstanceDto;
 import ai.preferred.cornac.dto.ExperimentDto;
+import ai.preferred.cornac.dto.UserAbAllocationDto;
 import ai.preferred.cornac.entity.*;
 import ai.preferred.cornac.repository.CornacInstanceRepository;
 import ai.preferred.cornac.repository.ExperimentRepository;
@@ -21,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -127,71 +129,169 @@ public class ExperimentService {
         }
     }
 
-    public EvaluationResult evaluateRecommendations(EvaluationRequest evaluationRequest) {
-        // 1. Get feedbacks
-        List<Feedback> feedbacks = feedbackService.getFeedbacks(
-                evaluationRequest.getExperimentId(), evaluationRequest.getDateFrom(), evaluationRequest.getDateTo()
-        );
-        System.out.println(evaluationRequest.getExperimentId());
-        System.out.println(evaluationRequest.getDateFrom());
-        System.out.println(evaluationRequest.getDateTo());
-        System.out.println("Feedbacks: " + feedbacks.size());
-
-        if (feedbacks.isEmpty()) {
-            throw new ErrorResponseException(HttpStatus.NOT_FOUND, new RuntimeException("No feedbacks found"));
+    public Map<String, CornacEvaluationResponse> evaluateRecommendationsRaw(EvaluationRequest evaluationRequest) {
+        // Do sanity checks
+        if (evaluationRequest.getModels().isEmpty()) {
+            throw new ErrorResponseException(HttpStatus.BAD_REQUEST, new RuntimeException("No models provided"));
         }
 
-        System.out.println("SAMPLE FEEDBACK ===");
-        System.out.println(feedbacks.get(0));
+        if (evaluationRequest.getMetrics().isEmpty()) {
+            throw new ErrorResponseException(HttpStatus.BAD_REQUEST, new RuntimeException("No metrics provided"));
+        }
 
-        CornacEvaluationRequest cornacEvaluationRequest = convertToCornacEvaluationRequest(evaluationRequest, feedbacks);
+        if (evaluationRequest.getExperimentId() == null) {
+            throw new ErrorResponseException(HttpStatus.BAD_REQUEST, new RuntimeException("No experiment ID provided"));
+        }
 
-        // 2. Send feedbacks to the Cornac evaluation service for each model
+        if (evaluationRequest.getDateFrom() == null) {
+            throw new ErrorResponseException(HttpStatus.BAD_REQUEST, new RuntimeException("No dateFrom provided"));
+        }
+
+        if (evaluationRequest.getDateTo() == null) {
+            throw new ErrorResponseException(HttpStatus.BAD_REQUEST, new RuntimeException("No dateTo provided"));
+        }
+
         List<CornacInstance> cornacInstances = cornacService.getInMemoryCornacInstances();
 
-//        List<CornacEvaluationResponse> evaluationResponses = new ArrayList<>();
-
-//        CornacEvaluationResponse evaluationResponse = cornacService.postCornacInstanceEvaluation(null, cornacEvaluationRequest);
-//        evaluationResponses.add(evaluationResponse);
+        List<String> models = evaluationRequest.getModels();
+        models.forEach(model -> {
+            if (cornacInstances.stream().noneMatch(cornacInstance -> cornacInstance.getServiceName().equals(model))) {
+                throw new ErrorResponseException(HttpStatus.BAD_REQUEST, new RuntimeException("Model " + model + " not found"));
+            }
+        });
 
         Map<String, CornacEvaluationResponse> modelNameToEvalResponse = new HashMap<>();
         List<String> metrics = new ArrayList<>();
 
-        cornacInstances.forEach(cornacInstance -> {
+        models.forEach(model -> {
+            // 1. Get feedbacks for each model
+            List<Feedback> feedbacks = feedbackService.getFeedbacks(
+                    evaluationRequest.getExperimentId(), evaluationRequest.getDateFrom(), evaluationRequest.getDateTo(), model
+            );
+            System.out.println("Feedbacks for model " + model + ": " + feedbacks.size());
+
+            if (feedbacks.isEmpty()) {
+                throw new ErrorResponseException(HttpStatus.NOT_FOUND, new RuntimeException("No feedbacks found for model: " + model));
+            }
+
+            // 2. get cornac instance for model
+            CornacInstance cornacInstance = cornacInstances.stream().filter(
+                    cornacInstance1 -> cornacInstance1.getServiceName().equals(model)
+            ).findFirst().orElseThrow(() -> new ErrorResponseException(HttpStatus.NOT_FOUND, new RuntimeException("Model " + model + " not found")));
+
+            // 3, prepare evaluation request
+            CornacEvaluationRequest cornacEvaluationRequest = convertToCornacEvaluationRequest(evaluationRequest, feedbacks);
+
+            // 4. do evaluation on cornac instance
             CornacEvaluationResponse evaluationResponse = cornacService.postCornacInstanceEvaluation(cornacInstance, cornacEvaluationRequest);
             modelNameToEvalResponse.put(cornacInstance.getServiceName(), evaluationResponse);
 
+            // metric names on model results differ from request, create a list of metric names
             if (metrics.isEmpty()) {
                 evaluationResponse.getResult().forEach((metric, userResult) -> {
                     metrics.add(metric);
                 });
             }
+
         });
 
-        // 3. Calculate T-test and p-value for each model pair
+        return modelNameToEvalResponse;
+    }
+    public EvaluationResult evaluateRecommendations(EvaluationRequest evaluationRequest) {
+        // Do sanity checks
+        if (evaluationRequest.getModels().isEmpty()) {
+            throw new ErrorResponseException(HttpStatus.BAD_REQUEST, new RuntimeException("No models provided"));
+        }
+
+        if (evaluationRequest.getMetrics().isEmpty()) {
+            throw new ErrorResponseException(HttpStatus.BAD_REQUEST, new RuntimeException("No metrics provided"));
+        }
+
+        if (evaluationRequest.getExperimentId() == null) {
+            throw new ErrorResponseException(HttpStatus.BAD_REQUEST, new RuntimeException("No experiment ID provided"));
+        }
+
+        if (evaluationRequest.getDateFrom() == null) {
+            throw new ErrorResponseException(HttpStatus.BAD_REQUEST, new RuntimeException("No dateFrom provided"));
+        }
+
+        if (evaluationRequest.getDateTo() == null) {
+            throw new ErrorResponseException(HttpStatus.BAD_REQUEST, new RuntimeException("No dateTo provided"));
+        }
+
+        List<CornacInstance> cornacInstances = cornacService.getInMemoryCornacInstances();
+
+        List<String> models = evaluationRequest.getModels();
+        models.forEach(model -> {
+            if (cornacInstances.stream().noneMatch(cornacInstance -> cornacInstance.getServiceName().equals(model))) {
+                throw new ErrorResponseException(HttpStatus.BAD_REQUEST, new RuntimeException("Model " + model + " not found"));
+            }
+        });
+
+        Map<String, CornacEvaluationResponse> modelNameToEvalResponse = new HashMap<>();
+        List<String> metrics = new ArrayList<>();
+
+        models.forEach(model -> {
+            // 1. Get feedbacks for each model
+            List<Feedback> feedbacks = feedbackService.getFeedbacks(
+                    evaluationRequest.getExperimentId(), evaluationRequest.getDateFrom(), evaluationRequest.getDateTo(), model
+            );
+            System.out.println("Feedbacks for model " + model + ": " + feedbacks.size());
+
+            if (feedbacks.isEmpty()) {
+                throw new ErrorResponseException(HttpStatus.NOT_FOUND, new RuntimeException("No feedbacks found for model: " + model));
+            }
+
+            // 2. get cornac instance for model
+            CornacInstance cornacInstance = cornacInstances.stream().filter(
+                    cornacInstance1 -> cornacInstance1.getServiceName().equals(model)
+            ).findFirst().orElseThrow(() -> new ErrorResponseException(HttpStatus.NOT_FOUND, new RuntimeException("Model " + model + " not found")));
+
+            // 3, prepare evaluation request
+            CornacEvaluationRequest cornacEvaluationRequest = convertToCornacEvaluationRequest(evaluationRequest, feedbacks);
+
+            // 4. do evaluation on cornac instance
+            CornacEvaluationResponse evaluationResponse = cornacService.postCornacInstanceEvaluation(cornacInstance, cornacEvaluationRequest);
+            modelNameToEvalResponse.put(cornacInstance.getServiceName(), evaluationResponse);
+
+            // metric names on model results differ from request, create a list of metric names
+            if (metrics.isEmpty()) {
+                evaluationResponse.getResult().forEach((metric, userResult) -> {
+                    metrics.add(metric);
+                });
+            }
+
+        });
+
+        // 5. Calculate T-test and p-value for each model pair
         List<TResult> tResultList = new ArrayList<>();
 
         for (String metric : metrics) {
             Map<String, TModelResult> modelToTModelResult = new HashMap<>();
 
-            for (CornacInstance fromInstance : cornacInstances) {
-                String fromModel = fromInstance.getServiceName();
+            for (String fromModel : modelNameToEvalResponse.keySet()) {
                 CornacEvaluationResponse fromEvaluationResponse = modelNameToEvalResponse.get(fromModel);
                 Map<String, Double> fromUserResults = fromEvaluationResponse.getUserResult().get(metric);
                 List<Double> fromValues = fromUserResults.values().stream().toList();
 
-                for (CornacInstance toInstance : cornacInstances) {
-                    String toModel = toInstance.getServiceName();
-                    CornacEvaluationResponse toEvaluationResponse = modelNameToEvalResponse.get(toInstance.getServiceName());
-                    Map<String, Double> toUserResults = toEvaluationResponse.getUserResult().get(metric);
-                    List<Double> toValues = toUserResults.values().stream().toList();
+                for (String toModel : modelNameToEvalResponse.keySet()) {
 
-                    double tVal = calculateTTest(fromValues.stream().mapToDouble(Double::doubleValue).toArray(),
-                            toValues.stream().mapToDouble(Double::doubleValue).toArray());
-                    double pVal = calculatePValue(fromValues.stream().mapToDouble(Double::doubleValue).toArray(),
-                            toValues.stream().mapToDouble(Double::doubleValue).toArray());
+                    PValue pValue;
 
-                    PValue pValue = new PValue(tVal, pVal);
+                    if (fromModel.equals(toModel)) {
+                        pValue = new PValue(0.0, 1.0);
+                    } else {
+                        CornacEvaluationResponse toEvaluationResponse = modelNameToEvalResponse.get(toModel);
+                        Map<String, Double> toUserResults = toEvaluationResponse.getUserResult().get(metric);
+                        List<Double> toValues = toUserResults.values().stream().toList();
+
+                        double tVal = calculateTTest(fromValues.stream().mapToDouble(Double::doubleValue).toArray(),
+                                toValues.stream().mapToDouble(Double::doubleValue).toArray());
+                        double pVal = calculatePValue(fromValues.stream().mapToDouble(Double::doubleValue).toArray(),
+                                toValues.stream().mapToDouble(Double::doubleValue).toArray());
+
+                        pValue = new PValue(tVal, pVal);
+                    }
 
                     TModelResult tModelResult;
                     if (modelToTModelResult.containsKey(fromModel)) {
@@ -207,6 +307,8 @@ public class ExperimentService {
             }
             tResultList.add(new TResult(metric, new ArrayList<>(modelToTModelResult.values())));
         }
+
+        // 6. Lastly, prepare entity for returning the results
 
         EvaluationResult evaluationResult = new EvaluationResult();
         evaluationResult.setMetrics(metrics);
@@ -232,19 +334,37 @@ public class ExperimentService {
             data.add(feedbackData);
         });
 
-        List<String> metrics = new ArrayList<>();
-        evaluationRequest.getMetrics().forEach(metricRequest -> {
-            metrics.add(metricRequest.getMetric());
-        });
+        List<String> metrics = evaluationRequest.getMetrics();
 
         return new CornacEvaluationRequest(metrics, data);
     }
 
     public Double calculateTTest(double[] a, double[] b) {
-        return ttestUtil.pairedTTest(a, b);
+        return ttestUtil.ttest(a, b);
     }
 
     public Double calculatePValue(double[] a, double[] b) {
-        return ttestUtil.pairedPvalue(a, b);
+        return ttestUtil.pValue(a, b);
+    }
+
+    public List<UserAbAllocationDto> getUserAbAllocations() {
+        Experiment experiment = getCurrentExperiment();
+        if (experiment == null) {
+            return new ArrayList<>();
+        }
+//        return cornacService.getUserAbAllocations(experiment.getId());
+        return new ArrayList<>(); // to implement
+    }
+
+    public List<FeedbackModelSummary> getFeedbackSummary(List<String> models, String experimentId, LocalDateTime dateFrom, LocalDateTime dateTo) {
+        return feedbackService.getFeedbackSummary(models, experimentId, dateFrom, dateTo);
+    }
+
+    public List<Feedback> getPastRatings(String userId) {
+        Experiment experiment = getCurrentExperiment();
+        if (experiment == null) {
+            throw new ErrorResponseException(HttpStatus.NOT_FOUND, new RuntimeException("No running experiment found"));
+        }
+        return feedbackService.getPastRatings(experiment.getId(), userId);
     }
 }

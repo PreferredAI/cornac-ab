@@ -319,7 +319,7 @@ public class CornacService {
 
     public Recommendation getApiRecommendation(CornacInstance cornacInstance, String userId, String k) {
         if (cornacInstance == null){
-            // get most popular products
+            throw new RuntimeException("Cornac instance not provided. Unable to get recommendation.");
         }
         WebClient webClient = cornacInstance.getWebClient();
         return webClient
