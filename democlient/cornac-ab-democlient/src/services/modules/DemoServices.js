@@ -1,17 +1,18 @@
 import {axios} from "../axios";
 
-export const postFeedback = (experimentId, userId, itemId) => {
-    return axios.post("/demo/feedback", {
-        experimentId: experimentId,
-        userId: userId,
-        itemId: itemId
+export const postFeedback = (recommendId, itemId, rating) => {
+    return axios.post("/app/feedback/", {}, {
+        params: {
+            recommendId: recommendId,
+            itemId: itemId,
+            rating: rating
+        }
     });
 }
 
-export const getRecommendations = (experimentId, userId) => {
-    return axios.get("/demo/recommendations", {
+export const getRecommendations = (userId) => {
+    return axios.get("/app/recommendations/", {
         params: {
-            experimentId: experimentId,
             userId: userId
         }
     });
