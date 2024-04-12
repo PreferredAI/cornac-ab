@@ -78,7 +78,7 @@ import 'v-calendar/style.css';
             <div class="mt-4 col-span-12">
                 <h2 class="text-2xl font-bold tracking-tight text-gray-900">Model Instances</h2>
             </div>
-            <div v-for="instance in modelInstances">
+            <div v-for="instance in activeExperiment.cornacInstances">
                 <TightCard :isLoading=isLoading>
                     <template #header>
                         {{ instance.serviceName }}
@@ -91,14 +91,15 @@ import 'v-calendar/style.css';
         </div>
         <div>
             <div class="mt-4">
-                <h2 class="text-2xl font-bold tracking-tight text-gray-900">Users Assigned Models</h2>
+                <h2 class="text-2xl font-bold tracking-tight text-gray-900">Users Dashboard</h2>
             </div>
             <div v-if="isLoading" class="animate-pulse w-full">
                 <div class="h-10 bg-slate-200 rounded mt-2"></div>
                 <div v-for="index in 12" class="h-4 bg-slate-200 rounded mt-2"></div>
             </div>
-            <div v-else class="mt-4 max-h-96 w-full overflow-auto overscroll-contain">
-                <table v-if="usersAssignedModels.length" class="w-full text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <div v-else class="mt-4 max-h-full w-full overflow-auto overscroll-contain">
+                <iframe id="overview_iframe" src="http://0.0.0.0:5601/app/dashboards#/view/4c3da600-f0cb-11ee-ad50-a7e44edec98b?embed=true&_g=(filters%3A!()%2Cquery%3A(language%3Akuery%2Cquery%3A'')%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'2023-12-08T07%3A39%3A57.280Z'%2Cto%3Anow))&hide-filter-bar=true" height="900" width="100%"></iframe>
+                <!-- <table v-if="usersAssignedModels.length" class="w-full text-left rtl:text-right text-gray-500 dark:text-gray-400">
                     <thead class="text-sm text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
                             <th scope="col" class="px-6 py-3">User ID</th>
@@ -117,11 +118,11 @@ import 'v-calendar/style.css';
                             <td class="px-6 py-2">{{ userModel.lastFeedback }}</td>
                         </tr>
                     </tbody>
-                </table>
-                <div v-else>
+                </table> -->
+                <!-- <div v-else>
                     <p class="text-xl tracking-tight font-semibold text-gray-900">No assigned users yet.</p>
                     <p class="text-l tracking-tight text-gray-900">This table will populate as more recommendations are made by users.</p>
-                </div>
+                </div> -->
             </div>
         </div>
         <div class="mt-8">
@@ -144,11 +145,19 @@ import 'v-calendar/style.css';
             <div class="mt-8 mb-4 col-span-12">
                 <h2 class="text-xl font-bold tracking-tight text-gray-900">Feedback Dashboard</h2>
                 <p class="text-lg text-gray-900">This dashboard shows information regarding to user interactions.</p> 
-                <p class="mt-2">Use the controls to update the dashboard and select "Run Evaluation" to calculate metrics of individual models based on the user feedback data.</p>
             </div>
 
             
             <div class="grid grid-cols-12 bg-gray-100">
+
+                <div class="col-span-12 my-2 px-4">
+                    <p class="mt-2 font-semibold">
+                        Filter Dashboard by Timestamp & Model
+                    </p>
+                    <p class="mt-2 font-light">
+                        Data filtered can be further used to calculate a variety of rating and ranking metrics available on the Cornac package.
+                    </p>
+                </div>
                 
                 <div class="col-span-6 my-2 mx-2 bg-white rounded-lg border border-dashed border-gray-900/25 px-6 py-4">
                     <p class="text-base font-semibold leading-6 text-gray-900">Filter by Timestamp</p>
@@ -177,15 +186,14 @@ import 'v-calendar/style.css';
                         <div v-if="isLoading" v-for="index in 3" class="animate-pulse mt-2 mx-2">
                             <div class="h-10 inline-block w-full bg-slate-200 rounded-lg"></div>
                         </div>
-                        <div v-else v-for="modelInstance in modelInstances">
-                            <div :class="dashboardFilters.model.indexOf(modelInstance.serviceName) > -1 ? 'ring-2 ring-indigo-500 bg-indigo-100': ''" class="relative mt-4 mx-2 grid place-items-center rounded-lg border hover:bg-indigo-200 border-indigo-900/25 py-1">
-                                <button type="button" class="absolute right-1 text-gray-400 hover:text-gray-500" @click="filterSelected(modelInstance.serviceName)">
-                                    <!-- <span class="sr-only">Remove</span> -->
-                                    <!-- <XMarkIcon class="h-6 w-6" aria-hidden="true" /> -->
+                        <div v-else v-for="modelInstance in activeExperiment.cornacInstances">
+                            <div class="mt-2 mx-2">
+                                <button v-on:click="filterSelected(modelInstance.serviceName)" :class="dashboardFilters.model.indexOf(modelInstance.serviceName) > -1 ? 
+                                    'ring-2 ring-indigo-500 bg-indigo-100': ''" class="w-full px-2 text-md font-semibold rounded-lg border text-gray-900 hover:text-gray-500 hover:bg-indigo-200 border-indigo-900/25 py-1">
+                                <!-- <button v-on:click="filterSelected(modelInstance.serviceName)" class="text-md font-semibold right-1 text-gray-900 hover:text-gray-500"> -->
+                                    {{ modelInstance.serviceName }}
                                 </button>
-                                <p class="text-md font-semibold text-center text-black">{{ modelInstance.serviceName }}</p>
                             </div>
-                            <!-- Active: "ring-2 ring-indigo-500" -->
                         </div>  
                     </div>
                 </div>
@@ -194,6 +202,9 @@ import 'v-calendar/style.css';
                 </div>
                 <div v-else class="mt-2 mb-2 ml-4 col-span-12">
                     <button v-on:click="runEvaluation" class="rounded-md bg-indigo-600 px-6 py-2 text-md font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Run Cornac Evaluation</button>
+                    <a class="mx-2 font-medium">
+                        <a class="font-bold text-lg text-indigo-600">&lt;&lt;</a> Calculate metrics such as  <a class="font-bold text-indigo-600">RMSE, NDCG, Precision, Recall</a>.
+                    </a>
                 </div>
             </div>
             <div v-if="isLoading" class="animate-pulse w-full">
@@ -226,6 +237,23 @@ export default {
                 startDateTime: '2024-01-01 00:00:00',
                 endDateTime: '',
                 userSeed: '123',
+                cornacInstances: [
+                    {
+                        serviceName: 'BPR',
+                        port: '61278',
+                        status: 'RUNNING',
+                    },
+                    {
+                        serviceName: 'BiVAECF',
+                        port: '61279',
+                        status: 'RUNNING',
+                    },
+                    {
+                        serviceName: 'LightGCN',
+                        port: '61280',
+                        status: 'RUNNING',
+                    },
+                ],
             },
             overallStatistics: {
                 recommendationsMade: 0,
@@ -234,23 +262,6 @@ export default {
                 feedbackToRecommendationsRatio: 0,
                 averageFeedbackRanking: 0,
             },
-            modelInstances: [
-                {
-                    serviceName: 'BPR',
-                    port: '61278',
-                    status: 'RUNNING',
-                },
-                {
-                    serviceName: 'BiVAECF',
-                    port: '61279',
-                    status: 'RUNNING',
-                },
-                {
-                    serviceName: 'LightGCN',
-                    port: '61280',
-                    status: 'RUNNING',
-                },
-            ],
             usersAssignedModels: [
                 {
                     userID: '1',
@@ -297,8 +308,9 @@ export default {
             ],
             dashboardFilters:{
                 timestamp: {
-                    start: new Date(2023, 12, 23),
-                    end: new Date(2024, 1, 11),
+                    start: new Date(2023, 11, 23),
+                    end: new Date(2024, 0, 11),
+                    // end: new Date(),
                 },
                 model: ["BPR", "BiVAECF", "LightGCN"],
             },
@@ -316,16 +328,18 @@ export default {
                 let data = experiment.data;
                 this.activeExperiment = data
 
-                // Get model instances
-                getCornacInstances().then((instances) => {
-                    let data = instances.data;
-                    this.modelInstances = data;
+                this.isLoading = false;
 
-                    this.isLoading = false;
-                }).catch((error) => {
-                    this.error = error;
-                    this.isLoading = false;
-                });
+                // // Get model instances
+                // getCornacInstances().then((instances) => {
+                //     let data = instances.data;
+                //     this.modelInstances = data;
+
+                //     this.isLoading = false;
+                // }).catch((error) => {
+                //     this.error = error;
+                //     this.isLoading = false;
+                // });
 
             }).catch((error) => {
                 this.error = error;
@@ -342,27 +356,36 @@ export default {
                 this.error = error;
             });
         },
-        loadModelInstances() {
-            // Get model instances
-            getCornacInstances().then((instances) => {
-                let data = instances.data;
-                this.modelInstances = data;
-            }).catch((error) => {
-                this.error = error;
-            });
-        },
+        // loadModelInstances() {
+        //     // Get model instances
+        //     getCornacInstances().then((instances) => {
+        //         let data = instances.data;
+        //         this.modelInstances = data;
+        //     }).catch((error) => {
+        //         this.error = error;
+        //     });
+        // },
         getRecommendationIframeUrl() {
-            var toDate = (new Date()).toISOString();
-            var fromDate = (new Date()).toISOString();
+            var toDate = this.dashboardFilters.timestamp.end.toISOString();
+            var fromDate = this.dashboardFilters.timestamp.start.toISOString();
             return `http://0.0.0.0:5601/app/dashboards#/view/0d1cdc40-ba96-11ee-8517-e5d0135698f5?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'${fromDate}'%2Cto%3A'${toDate}'))&hide-filter-bar=true&show-query-input=true&_a=(query:(language:kuery,query:'experiment_id:${this.activeExperiment.id}'))`;
         },
         getFeedbackIframeUrl() {
-            var toDate = (new Date()).toISOString();
-            var fromDate = (new Date()).toISOString();
-            return `http://0.0.0.0:5601/app/dashboards#/view/7ae59870-b90b-11ee-8517-e5d0135698f5?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'${fromDate}'%2Cto%3A'${toDate}'))&hide-filter-bar=true&_a=(query:(language:kuery,query:'experiment_id:${this.activeExperiment.id}'))`;
+            var toDate = this.dashboardFilters.timestamp.end.toISOString();
+            var fromDate = this.dashboardFilters.timestamp.start.toISOString();
+            var models = this.dashboardFilters.model.join(',');
+            return `http://0.0.0.0:5601/app/dashboards#/view/7ae59870-b90b-11ee-8517-e5d0135698f5?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'${fromDate}'%2Cto%3A'${toDate}'))&hide-filter-bar=true&_a=(query:(language:kuery,query:'model:${models}%20and%20experiment_id:${this.activeExperiment.id}'))`;
         },
         runEvaluation() {
-            alert(document.querySelector('div[data-test-subj="dataSharedTimefilterDuration"]')['data-shared-timefilter-duration']);
+            this.$router.push({ 
+                path: '/evaluation', 
+                query: {
+                    experimentId: this.activeExperiment.id,
+                    models: this.dashboardFilters.model,
+                    dateFrom: this.dashboardFilters.timestamp.start.toISOString(),
+                    dateTo: this.dashboardFilters.timestamp.end.toISOString(),
+                }
+            });
         },
         updateDashboard(fromDate, toDate) {
             fromDate = fromDate.toISOString();
@@ -370,13 +393,11 @@ export default {
             document.querySelector('#feedback_iframe').src = `http://0.0.0.0:5601/app/dashboards#/view/7ae59870-b90b-11ee-8517-e5d0135698f5?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'${fromDate}'%2Cto%3A'${toDate}'))&hide-filter-bar=true&_a=(query:(language:kuery,query:'experiment_id:${this.activeExperiment.id}'))`;
         },
         filterSelected(filter) {
-            alert(filter);
             if (this.dashboardFilters.model.indexOf(filter) > -1) {
                 this.dashboardFilters.model.splice(this.dashboardFilters.model.indexOf(filter), 1);
             } else {
                 this.dashboardFilters.model.push(filter);
             }
-            alert(this.dashboardFilters.model);
         }
 
     },

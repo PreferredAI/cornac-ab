@@ -203,9 +203,9 @@ export default {
                 this.models.forEach((model) => {
                 const formData = new FormData();
                 formData.append('name', model.name);
-                // formData.append('modelClass', "cornac.models." + model.class);
+                formData.append('modelClass', "cornac.models." + model.class);
 
-                formData.append('modelClass', "cornac.models.MF");
+                // formData.append('modelClass', "cornac.models.MF");
                 formData.append('file', model.file);
                 createCornacInstance(formData).then((response) => {
                     model.isModelReady = true;
