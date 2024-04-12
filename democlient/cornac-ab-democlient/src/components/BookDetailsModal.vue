@@ -28,15 +28,15 @@ defineExpose({ open });
 
                 <div class="grid w-full grid-cols-1 items-start gap-x-6 gap-y-8 sm:grid-cols-12 lg:gap-x-8">
                   <div class="h-full overflow-hidden rounded-lg sm:col-span-4 lg:col-span-5">
-                    <img :src="book.image_url" class="h-full w-full" />
+                    <img :src="book.attributes.image" class="h-full w-full" />
                   </div>
                   <div class="sm:col-span-8 lg:col-span-7">
-                    <h2 class="text-2xl font-bold text-gray-900 sm:pr-12">{{ book.original_title }}</h2>
+                    <h2 class="text-2xl font-bold text-gray-900 sm:pr-12">{{ book.attributesoriginal_title }}</h2>
 
                     <section aria-labelledby="information-heading" class="mt-2">
                       <h3 id="information-heading" class="sr-only">Product information</h3>
 
-                      <p class="text-2xl text-gray-900">{{ book.title }}</p>
+                      <p class="text-2xl text-gray-900">{{ book.attributes.title }}</p>
                     </section>
 
                     <section aria-labelledby="options-heading">
@@ -47,10 +47,10 @@ defineExpose({ open });
                           <h2 class="text-lg font-medium text-gray-900">Details</h2>
 
                           <div class="mt-2 space-y-2">
-                            <p class="text-md text-gray-600">Authors</p>{{ book.authors }}
-                            <p class="text-md text-gray-600">Year Released</p>{{ book.original_publication_year }}
-                            <p class="text-md text-gray-600">Average Rating</p>{{ book.average_rating }} stars
-                            <p class="text-md text-gray-600">ISBN</p>{{ book.isbn }}
+                            <p class="text-md text-gray-600">Authors</p>{{ book.attributes.authors }}
+                            <p class="text-md text-gray-600">Year Released</p>{{ book.attributes.year }}
+                            <p class="text-md text-gray-600">Average Rating</p>{{ book.attributes.rating }} stars
+                            <p class="text-md text-gray-600">ISBN</p>{{ book.attributes.isbn }}
 
                           </div>
                         </div>
