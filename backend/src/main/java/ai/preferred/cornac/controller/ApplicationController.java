@@ -1,17 +1,18 @@
 package ai.preferred.cornac.controller;
 
-import ai.preferred.cornac.entity.DemoItem;
-import ai.preferred.cornac.entity.DemoUser;
+import ai.preferred.cornac.entity.*;
 import ai.preferred.cornac.service.ApplicationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @CrossOrigin
-@RequestMapping(value = "/demo")
+@RequestMapping(value = "/app")
 public class ApplicationController {
     @Autowired
     private ApplicationService applicationService;
@@ -45,10 +46,22 @@ public class ApplicationController {
         return applicationService.createUser(userId, attributes);
     }
 
-    @RequestMapping(value = "/recommendations/{userId}", method = RequestMethod.GET)
-    public List<DemoItem> getRecommendations(
-            @PathVariable String userId
+    @RequestMapping(value = "/recommendations/", method = RequestMethod.GET)
+    public AppRecommendation getRecommendations(
+            @RequestParam String userId
     ) {
         return applicationService.getRecommendations(userId);
     }
+
+    @RequestMapping(value = "/feedback/", method = RequestMethod.POST)
+    public ResponseEntity postFeedback(
+            @RequestParam String recommendId,
+            @RequestParam String itemId,
+            @RequestParam Integer rating,
+            @RequestParam(defaultValue = "click") String action
+    ) {
+        Feedback feedback = applicationService.postFeedback(recommendId, itemId, rating, action);
+        return ResponseEntity.created(URI.create("/app/feedback/" + feedback.getId())).build();
+    }
+
 }

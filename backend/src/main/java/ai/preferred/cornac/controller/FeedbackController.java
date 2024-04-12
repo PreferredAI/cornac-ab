@@ -1,10 +1,12 @@
 package ai.preferred.cornac.controller;
 
 import ai.preferred.cornac.entity.Feedback;
+import ai.preferred.cornac.entity.FeedbackModelSummary;
 import ai.preferred.cornac.service.FeedbackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -21,9 +23,11 @@ public class FeedbackController {
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     public Feedback addFeedback(@RequestParam(name = "recommendId") String recommendId,
-                                    @RequestParam(defaultValue = "itemId") String itemId,
-                                    @RequestParam(name = "rating") String rating) {
-        return feedbackService.addFeedback(recommendId, itemId, Integer.parseInt(rating));
+                                @RequestParam(defaultValue = "itemId") String itemId,
+                                @RequestParam(name = "rating") String rating,
+                                @RequestParam(name = "action", defaultValue = "click") String action
+                                ) {
+        return feedbackService.addFeedback(recommendId, itemId, Integer.parseInt(rating), action);
     }
 
     @RequestMapping(value = "/topItems", method = RequestMethod.GET)
@@ -41,9 +45,9 @@ public class FeedbackController {
     public void submitFeedback(
             @RequestParam String recommendId,
             @RequestParam String itemId,
-            @RequestParam int feedback
+            @RequestParam int feedback,
+            @RequestParam String action
     ) {
-        feedbackService.addFeedback(recommendId, itemId, feedback);
+        feedbackService.addFeedback(recommendId, itemId, feedback, action);
     }
-
 }

@@ -98,7 +98,7 @@ public class RecommendService {
         CornacInstance cornacInstance;
         try {
             cornacInstance = cornacInstances.get(chosenInstance);
-        } catch (ArrayIndexOutOfBoundsException e){
+        } catch (IndexOutOfBoundsException e){
             LOGGER.warn("Cornac instance not found, applying fallback solution.");
             cornacInstance = null;
         }

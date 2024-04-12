@@ -5,9 +5,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface RecommendLogRepository extends CrudRepository<RecommendLog, Long> {
+public interface RecommendLogRepository extends CrudRepository<RecommendLog, String> {
     List<RecommendLog> findAll();
-
-    RecommendLog findById(String id);
 
 }

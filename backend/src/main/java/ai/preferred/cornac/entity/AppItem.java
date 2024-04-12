@@ -16,9 +16,9 @@ import java.util.Map;
 @Getter
 @Setter
 @Document(indexName = "#{@getItemCollection}")
-public class DemoItem {
+public class AppItem {
     @Id
     private String itemId;
     @Field(type = FieldType.Object)
-    private Map<String, String> attributes;
+    private Map<String, Object> attributes;
 }

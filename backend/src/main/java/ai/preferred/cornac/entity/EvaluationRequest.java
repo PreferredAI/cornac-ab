@@ -13,8 +13,8 @@ import java.util.List;
 @Getter
 @Setter
 public class EvaluationRequest {
-    private List<MetricRequest> metrics;
-    private List<Feedback> data;
+    private List<String> metrics;
+    private List<String> models;
     private String experimentId;
     private LocalDateTime dateFrom;
     private LocalDateTime dateTo;
@@ -23,7 +23,6 @@ public class EvaluationRequest {
     public String toString() {
         return "EvaluationRequest{" +
                 "metrics=" + metrics +
-                ", data=" + data +
                 ", experimentId='" + experimentId + '\'' +
                 ", dateFrom=" + dateFrom +
                 ", dateTo=" + dateTo +
