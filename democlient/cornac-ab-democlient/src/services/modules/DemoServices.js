@@ -1,11 +1,12 @@
 import {axios} from "../axios";
 
-export const postFeedback = (recommendId, itemId, rating) => {
+export const postFeedback = (recommendId, itemId, rating, action) => {
     return axios.post("/app/feedback/", {}, {
         params: {
             recommendId: recommendId,
             itemId: itemId,
-            rating: rating
+            rating: rating,
+            action: action,
         }
     });
 }
