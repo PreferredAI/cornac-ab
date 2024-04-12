@@ -1,11 +1,12 @@
 <script setup>
 import { XMarkIcon } from '@heroicons/vue/24/outline';
 import AddMetricModal from '../components/AddMetricModal.vue';
-import { ArrowRightCircleIcon } from '@heroicons/vue/24/solid'
+import { ArrowRightCircleIcon, ArrowLeftCircleIcon } from '@heroicons/vue/24/solid'
 import { Calendar, DatePicker } from 'v-calendar';
 import 'v-calendar/style.css';
 
 import { ref } from 'vue';
+import { postEvaluationResults, getFeedbackSummary } from '../services';
 
 
 const modal = ref(null);
@@ -22,7 +23,31 @@ const openModal = () => {
             <h1 class="text-3xl font-bold tracking-tight text-gray-900">Evaluation</h1>
             </div>
         </header>
-        <div v-if="!isEvaluationDone">
+        <div class="mt-6 flex items-center justify-start gap-x-6 col-span-12">
+            <button v-on:click="returnToDashboard" type="button" class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                <ArrowLeftCircleIcon class="-ml-0.5 mr-1.5 h-5 w-5 text-white-400" aria-hidden="true" />
+                Return to Dashboard
+            </button>
+        </div>
+        <div v-if="isLoading" class="mt-10 justify-center rounded-lg border border-dashed border-gray-900/25 bg-blue-100 px-6 py-10">
+            <h2 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Calculating Metrics</h2>
+            <p class="text-lg tracking-tight text-gray-900 dark:text-gray-400">This will take longer on evaluations with larger feedback data.</p>
+
+            <ul class="mt-4 max-w-md space-y-2 text-gray-500 list-inside dark:text-gray-400">
+                
+                <li class="flex items-center">
+                    <svg aria-hidden="true" class="w-4 h-4 me-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/><path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/></svg>
+                    Retrieving Feedback data
+                </li>
+                <div v-for="(model, index) in models" :key="index">
+                    <li class="flex items-center">
+                        <svg aria-hidden="true" class="w-4 h-4 me-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/><path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/></svg>
+                        Sending Feedback data to Cornac: {{model}}
+                    </li>
+                </div>
+            </ul>
+        </div>
+        <div v-else-if="!isEvaluationDone">
             <div>
                 <h2 class="mt-8 text-2xl tracking-tight font-semibold text-gray-900">Filters Selected</h2>
             </div>
@@ -30,26 +55,18 @@ const openModal = () => {
                 <div class="col-span-6 mx-2 bg-gray-50 rounded-lg border border-dashed border-gray-900/25 px-6 py-4">
                     <p class="text-base text-xl font-semibold leading-6 text-gray-900">Timestamp</p>
 
-                    <div class="mt-2">
-                        <p class="w-1/3 inline bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">23/12/2023</p>
-                        <ArrowRightCircleIcon class="inline mx-2 h-10 w-10 text-indigo-600" />
-                        <p class="w-1/3 inline bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">30/12/2023</p>
+                    <div class="mt-4">
+                        <p class="w-1/3 inline bg-gray-100 border ring-1 ring-gray-200 border-gray-300 text-gray-500 text-md font-semibold rounded-lg block w-full px-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">{{dateFrom.toLocaleDateString()}}</p>
+                        <ArrowRightCircleIcon class="inline mx-2 h-10 w-10 text-gray-400" />
+                        <p class="w-1/3 inline bg-gray-100 border ring-1 ring-gray-200 border-gray-300 text-gray-500 text-md font-semibold rounded-lg block w-full px-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">{{dateTo.toLocaleDateString()}}</p>
                     </div>
                 </div>
                 <div class="col-span-6 mx-2 bg-gray-50 rounded-lg border border-dashed border-gray-900/25 px-6 py-4">
                     <p class="text-base text-xl font-semibold leading-6 text-gray-900 col-span-3">Models</p>
                     <div class="grid grid-cols-3 mt-2">
-                        <div class="relative mt-2 mx-2 grid place-items-center rounded-lg border border-indigo-900/25 py-1 ring-2 ring-indigo-500 bg-indigo-100">
+                        <div v-for="model in models" class="relative mt-2 mx-2 grid place-items-center rounded-lg border border-gray-900/25 py-1 ring-1 ring-gray-200 bg-gray-100">
                             <button type="button" class="absolute right-1 text-gray-400 hover:text-gray-500" />
-                            <p class="text-md font-semibold text-center text-black">BPR</p>
-                        </div>
-                        <div class="relative mt-2 mx-2 grid place-items-center rounded-lg border border-indigo-900/25 py-1 ring-2 ring-indigo-500 bg-indigo-100">
-                            <button type="button" class="absolute right-1 text-gray-400 hover:text-gray-500" />
-                            <p class="text-md font-semibold text-center text-black">BiVAECF</p>
-                        </div>
-                        <div class="relative mt-2 mx-2 grid place-items-center rounded-lg border border-indigo-900/25 py-1 ring-2 ring-indigo-500 bg-indigo-100">
-                            <button type="button" class="absolute right-1 text-gray-400 hover:text-gray-500" />
-                            <p class="text-md font-semibold text-center text-black">LightGCN</p>
+                            <p class="text-md font-semibold text-center text-gray-500">{{ model }}</p>
                         </div>
                     </div>
                 </div>
@@ -73,31 +90,33 @@ const openModal = () => {
                 </div>
             </div> -->
             <div>
-                <div class="mt-2 mb-2 col-span-12">
+                <div class="my-6 col-span-12">
                     <h2 class="mt-2 text-2xl tracking-tight font-semibold text-gray-900">Feedback data</h2>
                 </div>
-                <div v-if="feedbackData.length" class="mt-2 max-h-96 overflow-auto overscroll-contain">
+                <div v-if="isSummaryLoading" class="animate-pulse w-full">
+                    <div class="h-10 bg-slate-200 rounded mt-2"></div>
+                    <div v-for="index in 5" class="h-6 bg-slate-200 rounded mt-2"></div>
+                </div>
+                <div v-else-if="feedbackData.length" class="mt-2 max-h-96 overflow-auto overscroll-contain">
                     <p class="text-lg tracking-tight text-gray-900">
-                        These feedback records provided by users will be added to the evaluation.
+                        Summary of data that will be put through individual models.
                     </p>
 
-                    <table class="mt-2 w-full text-lg text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                        <thead class="text-lg text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <table class="mt-2 w-full text-md text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                        <thead class="text-md text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
-                            <th scope="col" class="px-4 py-2">User ID</th>
-                            <th scope="col" class="px-4 py-2">Item ID</th>
-                            <th scope="col" class="px-4 py-2">Feedback</th>
-                            <th scope="col" class="px-4 py-2">Timestamp</th>
-                            <th scope="col" class="px-4 py-2">Model Allocated</th>
+                            <th scope="col" class="px-4 py-2">Model</th>
+                            <th scope="col" class="px-4 py-2">Number of Feedbacks</th>
+                            <th scope="col" class="px-4 py-2">Unique Users</th>
+                            <th scope="col" class="px-4 py-2">Unique Items</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="(feedback, index) in feedbackData" :key="index" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                <td class="px-4 py-2">{{ feedback.userId }}</td>
-                                <td class="px-4 py-2">{{ feedback.itemId }}</td>
-                                <td class="px-4 py-2">{{ feedback.rating }}</td>
-                                <td class="px-4 py-2">{{ feedback.timestamp }}</td>
-                                <td class="px-4 py-2">{{ feedback.modelAllocated }}</td>
+                                <td class="px-4 py-2">{{ feedback.model }}</td>
+                                <td class="px-4 py-2">{{ feedback.feedbackCount }}</td>
+                                <td class="px-4 py-2">{{ feedback.uniqueUsers }}</td>
+                                <td class="px-4 py-2">{{ feedback.uniqueItems }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -108,10 +127,13 @@ const openModal = () => {
                 </div>
             </div>
             
-            <div class="lg:grid lg:gap-4">
+            <div class="my-6 lg:grid lg:gap-4">
                 <h2 class="mt-2 text-2xl tracking-tight font-semibold text-gray-900 col-span-12">Select metrics to compute</h2>
-                <p class="text-lg tracking-tight text-gray-900">
+                <p v-if="addedMetrics.length" class="text-lg tracking-tight text-gray-900">
                     These {{ addedMetrics.length }} metrics will be added to the evaluation.
+                </p>
+                <p v-else class="text-lg tracking-tight text-gray-900">
+                    No metrics added yet. Click the button below to add metrics.
                 </p>
 
                 <div class="lg:grid lg:col-span-12 lg:grid-cols-4 lg:gap-x-6">
@@ -139,7 +161,7 @@ const openModal = () => {
                     </div>
                 </div>
                 <div class="mt-6 flex items-center justify-end gap-x-6 col-span-12">
-                    <button v-on:click="evaluateData" type="button" class="rounded-md bg-indigo-600 px-3 py-2 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Continue</button>
+                    <button type="button" v-on:click="evaluateData" :disabled="!addedMetrics.length" :class="addedMetrics.length? 'bg-indigo-600 hover:bg-indigo-500':'bg-indigo-200'"  class="rounded-md  px-10 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Start Evaluation</button>
                 </div>
             </div>
         </div>
@@ -148,40 +170,40 @@ const openModal = () => {
                 <div class="mt-8 mb-4 col-span-2">
                     <h2 class="text-2xl font-bold tracking-tight text-gray-900">Evaluation Results</h2>
                 </div>
-                <div class="col-span-1">
-                    <p class="text-2xl font-semibold tracking-tight text-gray-900">
+                <div class="col-span-2 my-4">
+                    <p class="text-xl font-semibold tracking-tight text-gray-900">
                         Metric Results
                     </p>
                     <table class="w-full text-md text-left rtl:text-right dark:text-gray-400">
-                        <thead class="text-lg uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <thead class="text-md uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
                                 <th></th>
-                                <th v-for="(metric, index) in evaluationResults.metrics" :key="index" scope="col" class="text-xl px-4 py-2">{{ metric }}</th>
+                                <th v-for="(metric, index) in evaluationResults.metrics" :key="index" scope="col" class="text-md px-4 py-2">{{ metric }}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(model, index) in evaluationResults.models" :key="index" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                <td class="text-xl font-bold px-4 py-2 bg-gray-50 dark:bg-gray-700 dark:text-gray-400">{{ model.model }}</td>
-                                <td v-for="(value, valIndex) in model.values" :key="valIndex" class="text-2xl px-4 py-2">{{ value.toFixed(4) }} </td>
+                            <tr v-for="(model, index) in evaluationResults.modelMetricResults" :key="index" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                <td class="text-md font-bold px-4 py-2 bg-gray-50 dark:bg-gray-700 dark:text-gray-400">{{ model.model }}</td>
+                                <td v-for="(metric, metIndex) in evaluationResults.metrics" :key="valIndex" class="text-lg px-4 py-2">{{ model.metricValues[metric].toFixed(6) }} </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <div v-for="(tResult, tMetric, index) in evaluationResults.tResults" :key="index" class="col-span-1">
-                    <p class="text-2xl font-semibold tracking-tight text-gray-900">
-                        T-Test - {{ tMetric }}
+                <div v-for="(tResult, index) in evaluationResults.tresults" :key="index" class="col-span-2 my-4">
+                    <p class="text-xl font-semibold tracking-tight text-gray-900">
+                        T-Test p-values - {{ tResult.metric }}
                     </p>
-                    <table class="w-full text-lg text-left rtl:text-right dark:text-gray-400">
+                    <table class="w-full text-md text-left rtl:text-right dark:text-gray-400">
                         <thead class="text-md uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
                                 <th></th>
-                                <th v-for="(tValue, tKey) in tResult" :key="tKey" scope="col" class="text-xl px-4 py-2">{{ tKey }}</th>
+                                <th v-for="(tModel, tKey) in tResult.modelComparison" :key="tKey" scope="col" class="text-md px-4 py-2">{{ tModel.model }}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(tValue, tKey) in tResult" :key="tKey" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                <td class="text-xl font-bold px-4 py-2 bg-gray-50 dark:bg-gray-700 dark:text-gray-400">{{ tKey }}</td>
-                                <td v-for="(value, valIndex) in tValue" :key="valIndex" class="px-4 py-2 text-2xl">{{ value.tValue.toFixed(4) }} <br/> (p-value = {{ value.pValue.toFixed(2) }}) </td>
+                            <tr v-for="(fromModel, tKey) in tResult.modelComparison" :key="tKey" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                <td class="text-md font-bold px-4 py-2 bg-gray-50 dark:bg-gray-700 dark:text-gray-400">{{ fromModel.model }}</td>
+                                <td v-for="(toModel, valIndex) in tResult.modelComparison" :key="valIndex" class="px-4 py-2 text-lg">{{ fromModel.toModelPValues[toModel.model].pvalue.toFixed(6) }} </td>
                             </tr>
                         </tbody>
                     </table>
@@ -189,7 +211,7 @@ const openModal = () => {
             </div>
             <div class="mt-6 flex items-center justify-start gap-x-6 col-span-12">
                 <!-- <button type="button" class="text-sm font-semibold leading-6 text-gray-900">Cancel</button> -->
-                <button v-on:click="evaluateData" type="button" class="rounded-md bg-indigo-600 px-3 py-2 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Download Evaluation to CSV</button>
+                <button v-on:click="downloadEvaluation" type="button" class="rounded-md bg-indigo-600 px-3 py-2 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Download Evaluation to CSV</button>
             </div>
         </div>
     </div>
@@ -197,248 +219,308 @@ const openModal = () => {
 
 <script>
 export default {
+    mounted() {
+        if (!this.$route.query.dateFrom || !this.$route.query.dateTo || !this.$route.query.experimentId || !this.$route.query.models) {
+            this.returnToDashboard();
+        } else {
+            this.loadFeedbackSummaryData();
+        }
+        this.dateFrom = new Date(this.$route.query.dateFrom);
+        this.dateTo = new Date(this.$route.query.dateTo);
+        this.experimentId = this.$route.query.experimentId;
+        this.models = this.$route.query.models;
+    },
     data() {
         return {
-            selectedDays: 7,
-            possibleDays: [7, 14, 30, 90],
+            isSummaryLoading: true,
+            isLoading: false,
+            error: null,
+            experimentId: 1,
+            dateFrom: new Date(2024, 0, 12),
+            dateTo: new Date(2024, 0, 13),
+            models: ["BPR", "BiVAECF", "LightGCN"],
             addedMetrics: [
                 {
-                    metric: "AUC",
-                    type: "ranking",
+                    metric: "RMSE",
+                    type: "rating",
                 },
                 {
                     metric: "NDCG",
                     type: "ranking",
                     k: 50
                 },
-                {
-                    metric: "Recall",
-                    type: "ranking",
-                    k: 50
-                },
             ],
             isEvaluationDone: false,
-            feedbackData:[
-                {
-                    userId: 9,
-                    itemId: 8,
-                    rating: 1,
-                    timestamp: '2023-12-23 15:46:10',
-                    modelAllocated: 'LightGCN'
-                },
-                {
-                    userId: 35,
-                    itemId: 398,
-                    rating: 1,
-                    timestamp: '2023-12-23 15:46:16',
-                    modelAllocated: 'BiVAECF'
-                },
-                {
-                    userId: 15,
-                    itemId: 275,
-                    rating: 1,
-                    timestamp: '2023-12-23 15:46:21',
-                    modelAllocated: 'LightGCN'
-                },
-                {
-                    userId: 37,
-                    itemId: 7173,
-                    rating: 1,
-                    timestamp: '2023-12-23 15:46:26',
-                    modelAllocated: 'BPR'
-                },
-                {
-                    userId: 9,
-                    itemId: 380,
-                    rating: 1,
-                    timestamp: '2023-12-23 15:46:30',
-                    modelAllocated: 'LightGCN'
-                },
-                {
-                    userId: 34,
-                    itemId: 483,
-                    rating: 1,
-                    timestamp: '2023-12-23 15:46:37',
-                    modelAllocated: 'BPR'
-                },
-                {
-                    userId: 35,
-                    itemId: 8598,
-                    rating: 1,
-                    timestamp: '2023-12-23 15:46:37',
-                    modelAllocated: 'BiVAECF'
-                },
-                {
-                    userId: 35,
-                    itemId: 3581,
-                    rating: 1,
-                    timestamp: '2023-12-23 15:46:38',
-                    modelAllocated: 'BPR'
-                }
-            ],
+            feedbackData:[],
             evaluationResults: {
-                "metrics": ["AUC", "NDCG@50", "Recall@50"],
-                "models": [
+                metrics: ["AUC", "NDCG@50", "Recall@50"],
+                modelMetricResults: [
                     {
                         "model": "BPR",
-                        "values": [0.8477, 0.0567, 0.0821]
+                        "metricValues": {"AUC": 0.8477, "NDCG@50": 0.0567, "Recall@50": 0.0821}
                     },
                     {
                         "model": "BiVAECF",
-                        "values": [0.8991, 0.0720, 0.1117]
+                        "metricValues": {"AUC": 0.8991, "NDCG@50": 0.0720, "Recall@50": 0.1117}
                     },
                     {
                         "model": "LightGCN",
-                        "values": [0.8982, 0.0704, 0.1097]
+                        "metricValues": {"AUC": 0.8982, "NDCG@50": 0.0704, "Recall@50": 0.1097}
                     },
                 ],
-                "tResults": {
-                    "AUC" : {
-                        "BPR": {
-                            "BPR": {
-                                "tValue": 0.0000,
-                                "pValue": 1.0000,
+                tresults: [
+                    {
+                        "metric": "AUC",
+                        "modelComparison": [
+                            {
+                                model: "BPR",
+                                toModelPValues: {
+                                    "BPR": {
+                                        "tValue": 0.0000,
+                                        "pValue": 1.0000,
+                                    },
+                                    "BiVAECF": {
+                                        "tValue": -52.8353,
+                                        "pValue": 0.0000,
+                                    },
+                                    "LightGCN": {
+                                        "tValue": -50.7681,
+                                        "pValue": 0.0000,
+                                    }
+                                },
                             },
-                            "BiVAECF": {
-                                "tValue": -52.8353,
-                                "pValue": 0.0000,
+                            {
+                                model: "BiVAECF",
+                                toModelPValues: {
+                                    "BPR": {
+                                        "tValue": 52.8353,
+                                        "pValue": 0.0000,
+                                    },
+                                    "BiVAECF": {
+                                        "tValue": 0.0000,
+                                        "pValue": 1.0000,
+                                    },
+                                    "LightGCN": {
+                                        "tValue": 1.0878,
+                                        "pValue": 0.2767,
+                                    },
+                                },
                             },
-                            "LightGCN": {
-                                "tValue": -50.7681,
-                                "pValue": 0.0000,
-                            }
-                        },
-                        "BiVAECF": {
-                            "BPR": {
-                                "tValue": 52.8353,
-                                "pValue": 0.0000,
+                            {
+                                model: "LightGCN",
+                                toModelPValues: {
+                                    "BPR": {
+                                        "tValue": 50.7681,
+                                        "pValue": 0.0000,
+                                    },
+                                    "BiVAECF": {
+                                        "tValue": -1.0878,
+                                        "pValue": 0.2767,
+                                    },
+                                    "LightGCN": {
+                                        "tValue": 0.0000,
+                                        "pValue": 1.0000,
+                                    },
+                                },
                             },
-                            "BiVAECF": {
-                                "tValue": 0.0000,
-                                "pValue": 1.0000,
-                            },
-                            "LightGCN": {
-                                "tValue": 1.0878,
-                                "pValue": 0.2767,
-                            },
-                        },
-                        "LightGCN": {
-                            "BPR": {
-                                "tValue": 50.7681,
-                                "pValue": 0.0000,
-                            },
-                            "BiVAECF": {
-                                "tValue": -1.0878,
-                                "pValue": 0.2767,
-                            },
-                            "LightGCN": {
-                                "tValue": 0.0000,
-                                "pValue": 1.0000,
-                            },
-                        },
+                        ],
                     },
-                    "NDCG@50" : {
-                        "BPR": {
-                            "BPR": {
-                                "tValue": 0.0000,
-                                "pValue": 1.0000,
+                    {
+                        "metric": "NDCG@50",
+                        "modelComparison": [
+                            {
+                                model: "BPR",
+                                toModelPValues: {
+                                    "BPR": {
+                                        "tValue": 0.0000,
+                                        "pValue": 1.0000,
+                                    },
+                                    "BiVAECF": {
+                                        "tValue": -16.2271,
+                                        "pValue": 0.0000,
+                                    },
+                                    "LightGCN": {
+                                        "tValue": -14.8709,
+                                        "pValue": 0.0000,
+                                    }
+                                },
                             },
-                            "BiVAECF": {
-                                "tValue": -16.2271,
-                                "pValue": 0.0000,
+                            {
+                                model: "BiVAECF",
+                                toModelPValues: {
+                                    "BPR": {
+                                        "tValue": 16.2271,
+                                        "pValue": 0.0000,
+                                    },
+                                    "BiVAECF": {
+                                        "tValue": 0.0000,
+                                        "pValue": 1.0000,
+                                    },
+                                    "LightGCN": {
+                                        "tValue": 1.6746,
+                                        "pValue": 0.0940,
+                                    },
+                                },
                             },
-                            "LightGCN": {
-                                "tValue": -14.8709,
-                                "pValue": 0.0000,
-                            }
-                        },
-                        "BiVAECF": {
-                            "BPR": {
-                                "tValue": 16.2271,
-                                "pValue": 0.0000,
+                            {
+                                model: "LightGCN",
+                                toModelPValues: {
+                                    "BPR": {
+                                        "tValue": 14.8709,
+                                        "pValue": 0.0000,
+                                    },
+                                    "BiVAECF": {
+                                        "tValue": -1.6746,
+                                        "pValue": 0.0940,
+                                    },
+                                    "LightGCN": {
+                                        "tValue": 0.0000,
+                                        "pValue": 1.0000,
+                                    },
+                                },
                             },
-                            "BiVAECF": {
-                                "tValue": 0.0000,
-                                "pValue": 1.0000,
-                            },
-                            "LightGCN": {
-                                "tValue": 1.6746,
-                                "pValue": 0.0940,
-                            },
-                        },
-                        "LightGCN": {
-                            "BPR": {
-                                "tValue": 14.8709,
-                                "pValue": 0.0000,
-                            },
-                            "BiVAECF": {
-                                "tValue": -1.6746,
-                                "pValue": 0.0940,
-                            },
-                            "LightGCN": {
-                                "tValue": 0.0000,
-                                "pValue": 1.0000,
-                            },
-                        },
+                        ],
                     },
-                    "Recall@50" : {
-                        "BPR": {
-                            "BPR": {
-                                "tValue": 0.0000,
-                                "pValue": 1.0000,
+                    {
+                        "metric": "Recall@50",
+                        "modelComparison": [
+                            {
+                                model: "BPR",
+                                toModelPValues: {
+                                    "BPR": {
+                                        "tValue": 0.0000,
+                                        "pValue": 1.0000,
+                                    },
+                                    "BiVAECF": {
+                                        "tValue": -18.9934,
+                                        "pValue": 0.0000,
+                                    },
+                                    "LightGCN": {
+                                        "tValue": -18.0030,
+                                        "pValue": 0.0000,
+                                    }
+                                },
                             },
-                            "BiVAECF": {
-                                "tValue": -18.9934,
-                                "pValue": 0.0000,
+                            {
+                                model: "BiVAECF",
+                                toModelPValues: {
+                                    "BPR": {
+                                        "tValue": 18.9934,
+                                        "pValue": 0.0000,
+                                    },
+                                    "BiVAECF": {
+                                        "tValue": 0.0000,
+                                        "pValue": 1.0000,
+                                    },
+                                    "LightGCN": {
+                                        "tValue": 1.1628,
+                                        "pValue": 0.2449,
+                                    },
+                                },
                             },
-                            "LightGCN": {
-                                "tValue": -18.0030,
-                                "pValue": 0.0000,
-                            }
-                        },
-                        "BiVAECF": {
-                            "BPR": {
-                                "tValue": 18.9934,
-                                "pValue": 0.0000,
+                            {
+                                model: "LightGCN",
+                                toModelPValues: {
+                                    "BPR": {
+                                        "tValue": 18.0030,
+                                        "pValue": 0.0000,
+                                    },
+                                    "BiVAECF": {
+                                        "tValue": -1.1628,
+                                        "pValue": 0.2449,
+                                    },
+                                    "LightGCN": {
+                                        "tValue": 0.0000,
+                                        "pValue": 1.0000,
+                                    },
+                                },
                             },
-                            "BiVAECF": {
-                                "tValue": 0.0000,
-                                "pValue": 1.0000,
-                            },
-                            "LightGCN": {
-                                "tValue": 1.1628,
-                                "pValue": 0.2449,
-                            },
-                        },
-                        "LightGCN": {
-                            "BPR": {
-                                "tValue": 18.0030,
-                                "pValue": 0.0000,
-                            },
-                            "BiVAECF": {
-                                "tValue": -1.1628,
-                                "pValue": 0.2449,
-                            },
-                            "LightGCN": {
-                                "tValue": 0.0000,
-                                "pValue": 1.0000,
-                            },
-                        },
+                        ],
                     },
-                },
+                ],
             },
         };
     },
     methods: {
+        returnToDashboard() {
+            this.$router.push({ path: '/dashboard' });
+        },
+        loadFeedbackSummaryData() {
+            getFeedbackSummary(this.models, this.experimentId, this.dateFrom, this.dateTo).then((response) => {
+                console.log('Feedback summary data:', response);
+                this.feedbackData = response.data;
+                this.isSummaryLoading = false;
+            }).catch((error) => {
+                this.error = error;
+                this.isSummaryLoading = false;
+            });
+        },
         evaluateData() {
-            // Perform data evaluation based on selectedDays value
-            console.log(`Evaluating data for the past ${this.selectedDays} days`);
-            this.isEvaluationDone = true;
+            console.log(`Evaluating data...`);
+            this.isLoading = true;
+            var metrics = this.addedMetrics.map(metric => {
+                return metric.type === "ranking" ? `${metric.metric}(k=${metric.k})` : `${metric.metric}()`
+            });
+
+            postEvaluationResults(
+                metrics, this.models, this.experimentId, this.dateFrom, this.dateTo
+            ).then((response) => {
+                console.log('Evaluation results:', response);
+                this.evaluationResults = response.data;
+                this.isEvaluationDone = true;
+                this.isLoading = false;
+            }).catch((error) => {
+                this.error = error;
+                this.isLoading = false;
+            });
         },
         downloadEvaluation() {
             // Download evaluation results to CSV
             console.log('Downloading evaluation results to CSV');
-            this.isEvaluationDone = false;
+            var tables = document.getElementsByTagName("table");
+            console.log('Tables:', tables);
+
+            var csv = [];
+
+            tables.forEach(table => {
+                var rows = table.rows;
+                for (var i = 0; i < rows.length; i++) {
+                    var row = [],
+                        cols = rows[i].cells;
+                    for (var j = 0; j < cols.length; j++) {
+                        row.push(cols[j].innerText);
+                    }
+                    csv.push(row.join(","));
+                }
+                csv.push("\n\n");
+            });
+
+            downloadCSV(csv.join("\n"), "evaluation_results.csv");
+        },
+        downloadCSV(csv, filename) {
+            var csvFile;
+            var downloadLink;
+
+            // CSV file
+            csvFile = new Blob([csv], { type: "text/csv" });
+
+            // Download link
+            downloadLink = document.createElement("a");
+
+            // File name
+            downloadLink.download = filename;
+
+            // Create a link to the file
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+
+            // Hide download link
+            downloadLink.style.display = "none";
+
+            // Add the link to DOM
+            document.body.appendChild(downloadLink);
+
+            // Click download link
+            downloadLink.click();
         },
         removeMetric(index) {
             this.addedMetrics.splice(index, 1);
