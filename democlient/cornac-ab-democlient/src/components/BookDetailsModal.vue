@@ -24,7 +24,7 @@ defineExpose({ open });
         <div class="flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4">
           <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0 translate-y-4 md:translate-y-0 md:scale-95" enter-to="opacity-100 translate-y-0 md:scale-100" leave="ease-in duration-200" leave-from="opacity-100 translate-y-0 md:scale-100" leave-to="opacity-0 translate-y-4 md:translate-y-0 md:scale-95">
             <DialogPanel class="flex w-full transform text-left text-base transition md:my-8 md:max-w-2xl md:px-4 lg:max-w-4xl">
-              <div class="relative flex w-full items-center overflow-hidden bg-white px-4 pb-8 pt-14 shadow-2xl sm:px-6 sm:pt-8 md:p-6 lg:p-8">
+              <div class="relative flex w-full items-center overflow-hidden bg-white px-4 pb-8 pt-14 shadow-2xl sm:px-6 sm:pt-8 md:p-6 lg:p-8 dark:bg-slate-800">
                 <button type="button" class="absolute right-4 top-4 text-gray-400 hover:text-gray-500 sm:right-6 sm:top-8 md:right-6 md:top-6 lg:right-8 lg:top-8" @click="close">
                   <span class="sr-only">Close</span>
                   <XMarkIcon class="h-6 w-6" aria-hidden="true" />
@@ -35,28 +35,32 @@ defineExpose({ open });
                     <img :src="book.attributes.image" class="h-full w-full" />
                   </div>
                   <div class="sm:col-span-8 lg:col-span-7">
-                    <h2 class="text-2xl font-bold text-gray-900 sm:pr-12">{{ book.attributes.original_title }}</h2>
+                    <h2 class="text-2xl font-bold text-gray-900 sm:pr-12 dark:text-white">{{ book.attributes.original_title }}</h2>
 
                     <section aria-labelledby="information-heading" class="mt-2">
                       <h3 id="information-heading" class="sr-only">Product information</h3>
 
-                      <p class="text-2xl text-gray-900">{{ book.attributes.title }}</p>
+                      <p class="text-2xl text-gray-900 dark:text-white">{{ book.attributes.title }}</p>
                     </section>
 
                     <section aria-labelledby="options-heading">
                       <h3 id="options-heading" class="sr-only">Product options</h3>
 
                         <div class="mt-2">
-                          <h2 class="text-lg font-medium text-gray-900">Details</h2>
+                          <h2 class="text-lg font-medium text-gray-900 dark:text-white">Details</h2>
 
-                          <div class="mt-2 space-y-2">
-                            <p class="text-md text-gray-600">Authors</p>{{ book.attributes.authors }}
-                            <p class="text-md text-gray-600">Year Released</p>{{ book.attributes.year }}
-                            <p class="text-md text-gray-600">Average Rating</p>{{ book.attributes.rating }} stars
-                            <p class="text-md text-gray-600">ISBN</p>{{ book.attributes.isbn }}
+                          <div class="mt-2">
+                            <p class="mt-2 text-md text-gray-600 dark:text-gray-300">Authors</p>
+                            <div class="dark:text-white">{{ book.attributes.authors }}</div>
+                            <p class="mt-2 text-md text-gray-600 dark:text-gray-300">Year Released</p>
+                            <div class="dark:text-white">{{ book.attributes.year }}</div>
+                            <p class="mt-2 text-md text-gray-600 dark:text-gray-300">Average Rating</p>
+                            <div class="dark:text-white">{{ book.attributes.rating }} stars</div>
+                            <p class="mt-2 text-md text-gray-600 dark:text-gray-300">ISBN</p>
+                            <div class="dark:text-white">{{ book.attributes.isbn }}</div>
                             
-                            <p v-if="book.selectedRating" class="text-md text-gray-600"> Rated </p>
-                            <p v-else class="text-md text-gray-600"> Rate this book </p>
+                            <p v-if="book.selectedRating" class="mt-2 text-md text-gray-600 dark:text-gray-300"> Rated </p>
+                            <p v-else class="mt-2 text-md text-gray-600 dark:text-gray-300"> Rate this book </p>
                             <div v-if="book.selectedRating" class="flex">
                               <svg v-for="n in book.selectedRating" class="text-yellow-400" width="23" height="23" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
