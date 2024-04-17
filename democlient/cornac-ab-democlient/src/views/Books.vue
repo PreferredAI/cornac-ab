@@ -18,6 +18,7 @@ const modal = ref(null);
                 Loading...
               </div>
             </div>
+            <div v-else-if="error"></div>
             <div v-else>
               <BookHistory :books="data.pastRatings"/>
             </div>
@@ -71,7 +72,7 @@ const modal = ref(null);
 </template>
 
 <script>
-import csv from '../assets/popular_book_details.csv';
+// import csv from '../assets/popular_book_details.csv';
 import { ref } from 'vue';
 export default {
     name: 'Books',
