@@ -1,8 +1,8 @@
 <template>
     <div class="container mx-auto p-4">
-        <header class="bg-white shadow">
+        <header class="bg-white shadow dark:bg-slate-800 dark:shadow-slate-500">
             <div class="mx-auto px-4 py-6 sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-bold tracking-tight text-gray-900">Environment Setup</h1>
+            <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Environment Setup</h1>
             </div>
         </header>
         <div v-if="isLoading" class="mt-10 justify-center rounded-lg border border-dashed border-gray-900/25 bg-blue-100 px-6 py-10">
@@ -33,37 +33,41 @@
             </ul>
         </div>
         <form v-else>
+            <div v-if="isActiveExperimentFound" class="mt-4 flex auto-cols-2 bg-white p-4 rounded bg-red-400">
+                <svg class="fill-current h-20 w-20 text-black dark:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27.963 27.963">	
+                    <path d="M13.983,0C6.261,0,0.001,6.259,0.001,13.979c0,7.724,6.26,13.984,13.982,13.984s13.98-6.261,13.98-13.984
+                        C27.963,6.259,21.705,0,13.983,0z M13.983,26.531c-6.933,0-12.55-5.62-12.55-12.553c0-6.93,5.617-12.548,12.55-12.548
+                        c6.931,0,12.549,5.618,12.549,12.548C26.531,20.911,20.913,26.531,13.983,26.531z"/>
+                    <polygon points="15.579,17.158 16.191,4.579 11.804,4.579 12.414,17.158 		"/>
+                    <path d="M13.998,18.546c-1.471,0-2.5,1.029-2.5,2.526c0,1.443,0.999,2.528,2.444,2.528h0.056c1.499,0,2.469-1.085,2.469-2.528 C16.441,19.575,15.468,18.546,13.998,18.546z"/>
+                </svg>
+                <div class="ml-4 my-3">
+                    <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Existing Experiment Found</h2>
+                    <p class="text-lg text-gray-900 dark:text-white">Starting a new experiment will end the current running experiment.</p>
+                </div>
+            </div>
             <div class="space-y-12">
                 <div class="border-b border-gray-900/10 pb-12 mt-6">
-                    <h2 class="mt-6 text-2xl tracking-tight font-semibold text-gray-900">Model setup</h2>
-                    <p class="mt-1 text-md text-gray-900">Add your trained models by zipping them up and uploading them here.</p>
+                    <h2 class="mt-6 text-2xl tracking-tight font-semibold text-gray-900 dark:text-white">Model setup</h2>
+                    <p class="mt-1 text-md text-gray-900 dark:text-white">Add your trained models by zipping them up and uploading them here.</p>
 
                     <div class="lg:grid lg:grid-cols-2 lg:gap-x-6">
                         <div v-for="(model, index) in models" :key="index" class="mt-6 grid grid-cols-1">
                             <div class="transition mt-2 justify-center rounded-lg border border-dashed border-gray-900/25 px-4 py-4">
                                 <div class="col-span-4 mt-2">
-                                    <label v-bind:for="'model-name-' + index" class="block text-lg font-semibold leading-6 text-gray-900">Model name</label>
+                                    <label v-bind:for="'model-name-' + index" class="block text-lg font-semibold leading-6 text-gray-900 dark:text-white">Model name</label>
                                     <div class="mt-2">
                                         <input type="text" name="model-name" v-bind:id="'model-name-' + index"  v-model="model.name" class="block w-full px-4 py-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="My model" />
                                     </div>
                                 </div>
-                                <!-- <div class="col-span-4 mt-4">
-                                    <label v-bind:for="'model-class-' + index" class="block text-sm font-medium leading-6 text-gray-900">Model class</label>
-                                    <div class="mt-2">
-                                        <div class="flex w-full rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
-                                            <span class="flex select-none items-center pl-3 text-gray-500 sm:text-sm">cornac.models.</span>
-                                            <input type="text" name="model-class" v-bind:id="'model-class-' + index" v-model="model.class" class="block flex-1 border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" placeholder="MF" />
-                                        </div>
-                                    </div>
-                                </div> -->
                                 <div class="col-span-4 mt-4">
-                                    <label for="model-file" class="block text-lg font-semibold leading-6 text-gray-900">Model file</label>
-                                    <label :class="model.file ? 'bg-green-50': 'bg-grey-50'" v-bind:for="'dropzone-file-' + index" class="flex mt-2 flex-col items-center justify-center w-full h-36 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                                    <label for="model-file" class="block text-lg font-semibold leading-6 text-gray-900 dark:text-white">Model file</label>
+                                    <label :class="model.file ? 'bg-green-50': 'bg-grey-50'" v-bind:for="'dropzone-file-' + index" class="flex mt-2 flex-col items-center justify-center w-full h-36 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer dark:hover:bg-gray-700 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
                                         <div v-if="!model.file" class="flex flex-col items-center justify-center pt-5 pb-6">
                                             <svg class="w-8 h-8 mb-2 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
                                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
                                             </svg>
-                                            <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                            <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span></p>
                                             <p class="text-xs text-gray-500 dark:text-gray-400">ZIP, up to 100 MB</p>
                                         </div>
                                         <div v-else class="flex flex-col items-center justify-center pt-5 pb-6">
@@ -100,74 +104,67 @@
                 </div>
 
             </div>
-<!-- 
-            <div class="border-b border-gray-900/10 pb-12 mt-4">
-                <h2 class="text-base font-semibold leading-7 text-gray-900">Experiment mode setup</h2>
-                <p class="mt-1 text-sm leading-6 text-gray-600">Set up how you would like to split users to receive models.</p>
-                Time, user, manual modes.
-            </div> -->
 
             <div class="mt-6 flex items-center justify-end gap-x-6">
-            <!-- <button type="button" class="text-sm font-semibold leading-6 text-gray-900">Cancel</button> -->
+
             <button v-on:click="submitForm" type="button" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Continue</button>
             </div>
         </form>
 
-        <!-- <div class="mb-4">
-            <label for="name" class="block font-bold mb-2">Name:</label>
-            <input type="text" id="name" v-model="name" class="border border-gray-300 px-4 py-2 rounded-md w-full" />
-        </div>
-
-        <div class="mb-4">
-            <label for="files" class="block font-bold mb-2">Please upload the Cornac trained model</label>
-            <label for="files" class="font-bold mb-2">The model should include a:
-                - .pkl file - .pkl.trainset file</label>
-            <h2 class="text-lg font-bold mb-2">Files:</h2>
-            <ul>
-                <li v-for="(file, index) in files" :key="index" class="mb-2">
-                    <input type="text" v-model="file.name" class="border border-gray-300 px-4 py-2 rounded-md w-full" />
-                    <button @click="removeFile(index)" class="ml-2 bg-red-500 text-white px-4 py-2 rounded-md">Remove</button>
-                </li>
-            </ul>
-            <button @click="addFile" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md">Add File</button>
-        </div> -->
     </div>
 </template>
 
 <script>
-import { createCornacInstance, createNewExperiment } from '../services';
-
+import { createCornacInstance, createNewExperiment, getActiveExperiment } from '../services';
 
 export default {
     data() {
         return {
             isLoading: false,
             isExperimentCreated: false,
+            isActiveExperimentFound: false,
             loadedModelCount: 0,
             models: [
                 {
-                    name: 'BPR',
+                    name: '',
                     class: '',
-                    file: { name: 'BPR.zip' },
-                    fileSize: '34.85 MB',
+                    file: null,
+                    fileSize: '',
                     isModelReady: false,
                 },
                 {
-                    name: 'BiVAECF',
+                    name: '',
                     class: '',
-                    file: { name: 'BiVAECF.zip' },
-                    fileSize: '68.56 MB',
+                    file: null,
+                    fileSize: '',
                     isModelReady: false,
                 },
-                {
-                    name: 'LightGCN',
-                    class: '',
-                    file: { name: 'LightGCN.zip' },
-                    fileSize: '54.05 MB',
-                    isModelReady: false,
-                },
+                // {
+                //     name: 'BPR',
+                //     class: '',
+                //     file: { name: 'BPR.zip' },
+                //     fileSize: '34.85 MB',
+                //     isModelReady: false,
+                // },
+                // {
+                //     name: 'BiVAECF',
+                //     class: '',
+                //     file: { name: 'BiVAECF.zip' },
+                //     fileSize: '68.56 MB',
+                //     isModelReady: false,
+                // },
+                // {
+                //     name: 'LightGCN',
+                //     class: '',
+                //     file: { name: 'LightGCN.zip' },
+                //     fileSize: '54.05 MB',
+                //     isModelReady: false,
+                // },
             ],
         };
+    },
+    mounted() {
+        this.checkActiveExperiment();
     },
     methods: {
         addMoreModel(e) {
@@ -180,9 +177,16 @@ export default {
             });
             e.preventDefault();
         },
+        checkActiveExperiment() {
+            // Get active experiment
+            getActiveExperiment().then((experiment) => {
+                this.isActiveExperimentFound = true;
+            }).catch((error) => {
+                console.log(error);
+            });
+        },
         removeModel(index) {
             this.models.splice(index, 1);
-            e.preventDefault();
         },
         formatFileSize(bytes) {
             var sufixes = ['B', 'kB', 'MB', 'GB', 'TB'];

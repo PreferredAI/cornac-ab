@@ -19,25 +19,25 @@ defineExpose({ open, modalClose });
         <div class="flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4">
           <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0 translate-y-4 md:translate-y-0 md:scale-95" enter-to="opacity-100 translate-y-0 md:scale-100" leave="ease-in duration-200" leave-from="opacity-100 translate-y-0 md:scale-100" leave-to="opacity-0 translate-y-4 md:translate-y-0 md:scale-95">
             <DialogPanel class="flex w-full transform text-left text-base transition md:my-8 md:max-w-2xl md:px-4 lg:max-w-4xl">
-              <div class="relative flex w-full items-center overflow-hidden bg-white px-4 pb-8 pt-14 shadow-2xl sm:px-6 sm:pt-8 md:p-6 lg:p-8">
+              <div class="relative flex w-full items-center overflow-hidden bg-white px-4 pb-8 pt-14 shadow-2xl sm:px-6 sm:pt-8 md:p-6 lg:p-8 dark:bg-slate-700">
                 <button type="button" class="absolute right-4 top-4 text-gray-400 hover:text-gray-500 sm:right-6 sm:top-8 md:right-6 md:top-6 lg:right-8 lg:top-8" @click="isContentShown = false">
                   <span class="sr-only">Close</span>
                   <XMarkIcon class="h-6 w-6" aria-hidden="true" />
                 </button>
 
                 <div class="grid grid-cols-12 w-full gap-4">
-                  <h2 class="col-span-12 text-2xl font-bold text-gray-900">Add New Metric</h2>
+                  <h2 class="col-span-12 text-2xl font-bold text-gray-900 dark:text-white">Add New Metric</h2>
 
-                  <p class="col-span-12 text-xl mt-8 text-gray-900">Rating Metrics</p>                  
+                  <p class="col-span-12 text-xl mt-8 text-gray-900  dark:text-white">Rating Metrics</p>                  
 
-                  <button v-for="(metric, index) in metricsAvailable.rating" :key="index" @click="selectMetric(metric, 'rating')" :class="metric == metricSelected.metric ? 'bg-indigo-100 ring-2 ring-indigo-500':''" class="col-span-3 mt-2 mx-2 place-items-center rounded-lg border border-indigo-900/25 hover:bg-gray-50 py-1">
-                    <p class="text-l font-semibold text-center text-black">{{ metric }}</p>
+                  <button v-for="(metric, index) in metricsAvailable.rating" :key="index" @click="selectMetric(metric, 'rating')" :class="metric == metricSelected.metric ? 'bg-indigo-100 ring-2 ring-indigo-500':''" class="col-span-3 mt-2 mx-2 place-items-center rounded-lg border border-indigo-900/25 hover:bg-gray-50 py-1 dark:bg-slate-500 dark:hover:bg-slate-600">
+                    <p class="text-l font-semibold text-center text-black dark:text-white">{{ metric }}</p>
                   </button>
 
-                  <p class="col-span-12 text-xl mt-8 text-gray-900">Ranking Metrics</p>
+                  <p class="col-span-12 text-xl mt-8 text-gray-900  dark:text-white">Ranking Metrics</p>
                   <div v-for="(metric, index) in metricsAvailable.ranking" :key="index" class="mx-2 col-span-3">
-                    <button @click="selectMetric(metric, 'ranking')" :class="metric == metricSelected.metric ? 'bg-indigo-100 ring-2 ring-indigo-500':''" class="w-full mt-2 grid place-items-center rounded-lg border border-indigo-900/25 hover:bg-gray-50 py-1">
-                      <p class="text-l font-semibold text-center text-black">{{ metric }}</p>
+                    <button @click="selectMetric(metric, 'ranking')" :class="metric == metricSelected.metric ? 'bg-indigo-100 ring-2 ring-indigo-500':''" class="w-full mt-2 grid place-items-center rounded-lg border border-indigo-900/25 hover:bg-gray-50 py-1 dark:bg-slate-500 dark:hover:bg-slate-600">
+                      <p class="text-l font-semibold text-center text-black  dark:text-white">{{ metric }}</p>
                     </button>
                     <div v-if="!nonKMetrics.includes(metric)" :class="metric == metricSelected.metric ? 'ring-2 ring-indigo-500':'invisible'" class="relative mt-2 rounded-md shadow-sm">
                       <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">

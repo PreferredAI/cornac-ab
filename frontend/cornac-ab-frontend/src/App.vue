@@ -17,6 +17,9 @@ import Welcome from './views/Welcome.vue'
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex h-16 items-center justify-between">
           <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <a href="/" class="text-xl font-semibold text-white sm:text-xl">Cornac A-B</a>
+            </div>
           <div class="hidden md:block">
               <div class="ml-10 flex items-baseline space-x-4">
               <a v-for="item in navigation" :key="item.name" :href="item.href" :class="[item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white', 'rounded-md px-3 py-2 text-sm font-medium']" :aria-current="item.current ? 'page' : undefined">{{ item.name }}</a>
@@ -52,13 +55,12 @@ import Welcome from './views/Welcome.vue'
 
 <script setup>
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
-// import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 
 const navigation = [
-  { name: 'Welcome', href: '/', current: false },
-  { name: 'Setup', href: '/setup', current: false },
+  // { name: 'Welcome', href: '/', current: false },
+  // { name: 'Setup', href: '/setup', current: false },
   { name: 'Dashboard', href: '/dashboard', current: false },
-  { name: 'Evaluation', href: '/evaluation', current: false },
+  // { name: 'Evaluation', href: '/evaluation', current: false },
 ]
 </script>
 
