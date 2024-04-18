@@ -1,9 +1,8 @@
 <script setup>
-import { getCornacInstances, getActiveExperiment } from '../services';
-import SimpleCard from '../components/SimpleCard.vue';
+import { getActiveExperiment } from '../services';
 import TightCard from '../components/TightCard.vue';
-import { ArrowRightCircleIcon } from '@heroicons/vue/24/solid'
-import { Calendar, DatePicker } from 'v-calendar';
+import { ArrowRightCircleIcon, Cog6ToothIcon } from '@heroicons/vue/24/solid'
+import { DatePicker } from 'v-calendar';
 import 'v-calendar/style.css';
 
 </script>
@@ -31,14 +30,24 @@ import 'v-calendar/style.css';
         </div>
     </div>
     <div v-else class="container mx-auto p-4">
-        <header class="bg-white shadow">
+        <header class="bg-white shadow dark:bg-slate-800 dark:shadow-slate-500">
             <div class="mx-auto px-4 py-6 sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-bold tracking-tight text-gray-900">Experiment Dashboard</h1>
+            <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Experiment Dashboard</h1>
             </div>
         </header>
+        <div class="mt-6 flex items-center justify-start gap-x-6 col-span-12">
+            <button v-on:click="redirectToSetup" type="button" class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                <Cog6ToothIcon class="-ml-0.5 mr-1.5 h-5 w-5 text-white-400" aria-hidden="true" />
+                Start a New Experiment
+            </button>
+        </div>
+        <div v-if="!activeExperiment" class="mt-4 bg-white p-4 rounded dark:bg-slate-500">
+            <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Start a New Experiment</h2>
+            <p class="text-lg text-gray-900 dark:text-white">No running experiments found. Upload your models to begin a new one!</p>
+        </div>
         <div class="lg:grid lg:gap-4">
             <div class="mt-4 col-span-12">
-                <h2 class="text-2xl font-bold tracking-tight text-gray-900">Experiment Details</h2>
+                <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Experiment Details</h2>
             </div>        
             <TightCard :isLoading=isLoading>
                 <template #header>
@@ -76,7 +85,7 @@ import 'v-calendar/style.css';
         </div>
         <div class="lg:grid lg:gap-4">
             <div class="mt-4 col-span-12">
-                <h2 class="text-2xl font-bold tracking-tight text-gray-900">Model Instances</h2>
+                <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Model Instances</h2>
             </div>
             <div v-for="instance in activeExperiment.cornacInstances">
                 <TightCard :isLoading=isLoading>
@@ -91,7 +100,7 @@ import 'v-calendar/style.css';
         </div>
         <div>
             <div class="mt-4">
-                <h2 class="text-2xl font-bold tracking-tight text-gray-900">Users Dashboard</h2>
+                <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Users Dashboard</h2>
             </div>
             <div v-if="isLoading" class="animate-pulse w-full">
                 <div class="h-10 bg-slate-200 rounded mt-2"></div>
@@ -99,36 +108,12 @@ import 'v-calendar/style.css';
             </div>
             <div v-else class="mt-4 max-h-full w-full overflow-auto overscroll-contain">
                 <iframe id="overview_iframe" src="http://0.0.0.0:5601/app/dashboards#/view/4c3da600-f0cb-11ee-ad50-a7e44edec98b?embed=true&_g=(filters%3A!()%2Cquery%3A(language%3Akuery%2Cquery%3A'')%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'2023-12-08T07%3A39%3A57.280Z'%2Cto%3Anow))&hide-filter-bar=true" height="900" width="100%"></iframe>
-                <!-- <table v-if="usersAssignedModels.length" class="w-full text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                    <thead class="text-sm text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                        <tr>
-                            <th scope="col" class="px-6 py-3">User ID</th>
-                            <th scope="col" class="px-6 py-3">Model Assigned</th>
-                            <th scope="col" class="px-6 py-3">Recommendations Served</th>
-                            <th scope="col" class="px-6 py-3">Feedbacks by User</th>
-                            <th scope="col" class="px-6 py-3">Last Feedback Interaction</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-sm">
-                        <tr v-for="(userModel, index) in usersAssignedModels" :key="index" class="bg-white border dark:bg-gray-800 dark:border-gray-700">
-                            <td class="px-6 py-2">{{ userModel.userID }}</td>
-                            <td class="px-6 py-2">{{ userModel.modelAssigned }}</td>
-                            <td class="px-6 py-2">{{ userModel.recommendationsMade }}</td>
-                            <td class="px-6 py-2">{{ userModel.feedbackMade }}</td>
-                            <td class="px-6 py-2">{{ userModel.lastFeedback }}</td>
-                        </tr>
-                    </tbody>
-                </table> -->
-                <!-- <div v-else>
-                    <p class="text-xl tracking-tight font-semibold text-gray-900">No assigned users yet.</p>
-                    <p class="text-l tracking-tight text-gray-900">This table will populate as more recommendations are made by users.</p>
-                </div> -->
             </div>
         </div>
         <div class="mt-8">
             <div class="mt-8 mb-4 col-span-12">
-                <h2 class="text-2xl font-bold tracking-tight text-gray-900">Recommendations Dashboard</h2>
-                <p class="text-lg text-gray-900">This dashboard shows information regarding to the loaded recommendations shown to users.</p>
+                <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Recommendations Dashboard</h2>
+                <p class="text-lg text-gray-900 dark:text-white">This dashboard shows information regarding to the loaded recommendations shown to users.</p>
             </div>
 
             <div v-if="isLoading" class="animate-pulse w-full">
@@ -138,13 +123,11 @@ import 'v-calendar/style.css';
             <div v-else>
                 <iframe :src="getRecommendationIframeUrl()" height="2048" width="100%"></iframe>
             </div>
-            <!-- <iframe id="opensearch_iframe" src="http://0.0.0.0:5602/app/dashboards#/view/7ae59870-b90b-11ee-8517-e5d0135698f5?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'2023-12-23T07%3A22%3A52.702Z'%2Cto%3A'2024-01-11T07%3A22%3A52.702Z'))&show-query-input=true&show-time-filter=true&hide-filter-bar=true" height="2048" width="100%"></iframe> -->
-            <!-- <iframe src="http://0.0.0.0:5601/app/dashboards#/view/33b096d0-aea2-11ee-b947-3122bf2f92d4?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'2023-12-13T09%3A01%3A28.484Z'%2Cto%3A'2024-01-12T09%3A01%3A58.901Z'))&show-top-menu=true&show-time-filter=true" height="1024" width="100%"></iframe> -->
         </div>
         <div class="mt-8">
             <div class="mt-8 mb-4 col-span-12">
-                <h2 class="text-xl font-bold tracking-tight text-gray-900">Feedback Dashboard</h2>
-                <p class="text-lg text-gray-900">This dashboard shows information regarding to user interactions.</p> 
+                <h2 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white">Feedback Dashboard</h2>
+                <p class="text-lg text-gray-900 dark:text-white">This dashboard shows information regarding to user interactions.</p> 
             </div>
 
             
@@ -172,9 +155,9 @@ import 'v-calendar/style.css';
                         <DatePicker v-model.range="dashboardFilters.timestamp" color="indigo" is-required>
                             <template #default="{ inputValue, inputEvents }">
                             <div class="mt-2">
-                                <input class="w-1/3 inline bg-gray-50 border border-gray-300 text-gray-900 text-md text-center rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" :value="inputValue.start" v-on="inputEvents.start" />
+                                <input class="w-1/3 inline bg-gray-50 border border-gray-300 text-gray-900 text-md text-center rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2 p-2.5" :value="inputValue.start" v-on="inputEvents.start" />
                                 <ArrowRightCircleIcon class="inline mx-2 h-10 w-10 text-indigo-600" />
-                                <input class="w-1/3 inline bg-gray-50 border border-gray-300 text-gray-900 text-md text-center rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" :value="inputValue.end" v-on="inputEvents.end" />
+                                <input class="w-1/3 inline bg-gray-50 border border-gray-300 text-gray-900 text-md text-center rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2 p-2.5" :value="inputValue.end" v-on="inputEvents.end" />
                             </div>
                             </template>
                         </DatePicker>
@@ -190,7 +173,6 @@ import 'v-calendar/style.css';
                             <div class="mt-2 mx-2">
                                 <button v-on:click="filterSelected(modelInstance.serviceName)" :class="dashboardFilters.model.indexOf(modelInstance.serviceName) > -1 ? 
                                     'ring-2 ring-indigo-500 bg-indigo-100': ''" class="w-full px-2 text-md font-semibold rounded-lg border text-gray-900 hover:text-gray-500 hover:bg-indigo-200 border-indigo-900/25 py-1">
-                                <!-- <button v-on:click="filterSelected(modelInstance.serviceName)" class="text-md font-semibold right-1 text-gray-900 hover:text-gray-500"> -->
                                     {{ modelInstance.serviceName }}
                                 </button>
                             </div>
@@ -214,8 +196,6 @@ import 'v-calendar/style.css';
             <div v-else>
                 <iframe id="feedback_iframe" :src="getFeedbackIframeUrl()" height="2048" width="100%"></iframe>
             </div>
-            <!-- <iframe id="feedback_iframe" src="http://0.0.0.0:5602/app/dashboards#/view/7ae59870-b90b-11ee-8517-e5d0135698f5?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'2023-12-23T07%3A22%3A52.702Z'%2Cto%3A'2024-02-21T16:00:00.000Z'))&_a=(query:(language:kuery,query:'model=BPR'))&show-time-filter=true&show-top-menu=true&hide-filter-bar=true&show-query-input=true" height="2048" width="100%"></iframe> -->
-            <!-- <iframe src="http://0.0.0.0:5601/app/dashboards#/view/33b096d0-aea2-11ee-b947-3122bf2f92d4?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'2023-12-13T09%3A01%3A28.484Z'%2Cto%3A'2024-01-12T09%3A01%3A58.901Z'))&show-top-menu=true&show-time-filter=true" height="1024" width="100%"></iframe> -->
         </div>
     </div>
 </template>
@@ -320,6 +300,9 @@ export default {
         this.loadDashboard();
     },
     methods: {
+        redirectToSetup() {
+            this.$router.push({ path: '/setup' });
+        },
         loadDashboard() {
             this.isLoading = true;
             this.error = null;
@@ -330,45 +313,19 @@ export default {
 
                 this.isLoading = false;
 
-                // // Get model instances
-                // getCornacInstances().then((instances) => {
-                //     let data = instances.data;
-                //     this.modelInstances = data;
-
-                //     this.isLoading = false;
-                // }).catch((error) => {
-                //     this.error = error;
-                //     this.isLoading = false;
-                // });
-
             }).catch((error) => {
-                this.error = error;
+                if (error.indexOf("No running experiment found") !== -1) {
+                    this.activeExperiment = null;
+                } else {
+                    this.error = error;
+                }
                 this.isLoading = false;
             });
         },
-        loadActiveExperiment() {
-            // Get active experiment
-            getActiveExperiment().then((experiment) => {
-                this.isLoading = false;
-                let data = experiment.data;
-                this.activeExperiment = data
-            }).catch((error) => {
-                this.error = error;
-            });
-        },
-        // loadModelInstances() {
-        //     // Get model instances
-        //     getCornacInstances().then((instances) => {
-        //         let data = instances.data;
-        //         this.modelInstances = data;
-        //     }).catch((error) => {
-        //         this.error = error;
-        //     });
-        // },
         getRecommendationIframeUrl() {
             var toDate = this.dashboardFilters.timestamp.end.toISOString();
             var fromDate = this.dashboardFilters.timestamp.start.toISOString();
-            return `http://0.0.0.0:5601/app/dashboards#/view/0d1cdc40-ba96-11ee-8517-e5d0135698f5?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'${fromDate}'%2Cto%3A'${toDate}'))&hide-filter-bar=true&show-query-input=true&_a=(query:(language:kuery,query:'experiment_id:${this.activeExperiment.id}'))`;
+            return `http://0.0.0.0:5601/app/dashboards#/view/0d1cdc40-ba96-11ee-8517-e5d0135698f5?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'${fromDate}'%2Cto%3A'${toDate}'))&hide-filter-bar=true&_a=(query:(language:kuery,query:'experiment_id:${this.activeExperiment.id}'))`;
         },
         getFeedbackIframeUrl() {
             var toDate = this.dashboardFilters.timestamp.end.toISOString();
