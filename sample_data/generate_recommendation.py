@@ -17,6 +17,8 @@ def generate_rec_ids(item_id):
     return item_ids
 
 def generate_recommendations_csv():
+    global popular_books
+    
     # Define the input and output CSV file paths
     input_csv_file_path = 'feedbacks.csv'
     output_csv_file_path = 'recommendations.csv'
