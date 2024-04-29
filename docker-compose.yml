@@ -123,6 +123,8 @@ services:
     depends_on:
       dashboards-init:
           condition: service_completed_successfully
+      data-init:
+          condition: service_completed_successfully
     networks:
       - opensearch-net
       - cornac-ab-net
