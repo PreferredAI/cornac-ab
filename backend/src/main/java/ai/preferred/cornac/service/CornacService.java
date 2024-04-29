@@ -118,8 +118,11 @@ public class CornacService {
 
         // unzip file
         try {
-            FileUtil.unzipFile(cornacProperties.getUploadDir() + "/" + modelClass + "-" + name + "/file.zip", "uploads/" + modelClass + "-" + name + "/output/", true);
+            System.out.println("unzipping file...");
+            String directory = cornacProperties.getUploadDir()  + "/" + modelClass + "-" + name;
+            FileUtil.unzipFile(directory + "/file.zip", directory + "/output/", true);
         } catch (IOException e) {
+            e.printStackTrace();
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Unable to unzip file. Please try again."
