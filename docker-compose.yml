@@ -94,6 +94,58 @@ services:
     - opensearch-dashboards
     networks:
       - opensearch-net
+  data-init:
+    image: cornac/cornac-ab-sample-data
+    container_name: data-init
+    environment:
+      - OPENSEARCH_HOST=opensearch-node1
+      - OPENSEARCH_PORT=9200
+    depends_on:
+      dashboards-init:
+          condition: service_completed_successfully
+    networks:
+      - opensearch-net
+  cornac-ab-backend:
+    image: cornac/cornac-ab-backend:latest
+    container_name: cornac-ab-backend
+    environment:
+      - OPENSEARCH_HOST=opensearch-node1
+      - OPENSEARCH_PORT=9200
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/tmp/data/demodb
+      - CORNAC_UPLOAD_DIR=/tmp/uploads
+      - CORNAC_EXECUTABLE_DIR=.
+    ports:
+      - 8080:8080
+    volumes:
+      - ./data/:/tmp/data/
+#      - ./cornac/:/tmp/cornac/
+      - ./uploads/:/tmp/uploads/
+    depends_on:
+      dashboards-init:
+          condition: service_completed_successfully
+    networks:
+      - opensearch-net
+      - cornac-ab-net
+  cornac-ab-frontend:
+    image: cornac/cornac-ab-frontend:latest
+    container_name: cornac-ab-frontend
+    ports:
+      - 8081:8080
+    depends_on:
+      - cornac-ab-backend
+    networks:
+      - opensearch-net
+      - cornac-ab-net
+  cornac-ab-demo:
+    image: cornac/cornac-ab-demo:latest
+    container_name: cornac-ab-demo
+    ports:
+      - 8082:8080
+    depends_on:
+      - cornac-ab-backend
+    networks:
+      - cornac-ab-net
+
 
 volumes:
   opensearch-data1:
@@ -101,3 +153,4 @@ volumes:
 
 networks:
   opensearch-net:
+  cornac-ab-net:

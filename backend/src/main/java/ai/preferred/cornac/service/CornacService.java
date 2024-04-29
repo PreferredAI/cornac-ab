@@ -1,5 +1,6 @@
 package ai.preferred.cornac.service;
 
+import ai.preferred.cornac.config.CornacProperties;
 import ai.preferred.cornac.dto.CornacInstanceDto;
 import ai.preferred.cornac.entity.*;
 import ai.preferred.cornac.repository.CornacInstanceRepository;
@@ -59,6 +60,9 @@ public class CornacService {
     @Autowired
     private UserAbAllocationRepository userAbAllocationRepository;
 
+    @Autowired
+    private CornacProperties cornacProperties;
+
     @Transactional
     public CornacInstanceDto createCornacInstance(String name, String modelClass, Integer experimentId, MultipartFile file) {
 
@@ -83,7 +87,7 @@ public class CornacService {
 
         storeFileInTemp(file, modelClass + "-" + name);
         try {
-            FileUtil.unzipFile("uploads/" + modelClass + "-" + name + "/file.zip", "uploads/" + modelClass + "-" + name + "/output/", true);
+            FileUtil.unzipFile(cornacProperties.getUploadDir() + "/" + modelClass + "-" + name + "/file.zip", "uploads/" + modelClass + "-" + name + "/output/", true);
         } catch (IOException e) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -101,17 +105,26 @@ public class CornacService {
                 .toLowerCase()
                 .startsWith("windows");
 
-        String modelFolder = "uploads/" + modelClass + "-" + name + "/output/";
+        String modelFolder = cornacProperties.getUploadDir()
+                + "/" + modelClass + "-" + name + "/output/";
         int port;
 
-        try {
-            ServerSocket serverSocket = new ServerSocket(0);
+        try (ServerSocket serverSocket = new ServerSocket(0)){
             port = serverSocket.getLocalPort();
 
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
+        // unzip file
+        try {
+            FileUtil.unzipFile(cornacProperties.getUploadDir() + "/" + modelClass + "-" + name + "/file.zip", "uploads/" + modelClass + "-" + name + "/output/", true);
+        } catch (IOException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Unable to unzip file. Please try again."
+            );
+        }
 
         ProcessBuilder builder = new ProcessBuilder();
 
@@ -119,7 +132,7 @@ public class CornacService {
             // windows cmd file is not yet included.
             builder.command("cmd.exe", "cornac-run.cmd", Integer.toString(port), modelFolder, modelClass);
         } else {
-            builder.command("sh", "cornac-run.sh", Integer.toString(port), modelFolder, modelClass);
+            builder.command("sh", cornacProperties.getExecutableDir() + "/cornac-run.sh", Integer.toString(port), modelFolder, modelClass);
         }
 
         try {
@@ -306,7 +319,7 @@ public class CornacService {
             throw new RuntimeException("Empty file attached. Unable to store.");
         }
 
-        Path uploadDir = Paths.get("uploads");
+        Path uploadDir = Paths.get(cornacProperties.getUploadDir());
 
         try (InputStream inputStream = file.getInputStream()) {
             Files.createDirectories(uploadDir.resolve(dirName));

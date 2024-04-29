@@ -57,6 +57,10 @@ public class ExperimentService {
     }
 
     public ExperimentDto getActiveExperiment(){
+        Experiment experiment = getCurrentExperiment();
+        if (experiment == null) {
+            throw new ErrorResponseException(HttpStatus.NOT_FOUND, new RuntimeException("No running experiment found"));
+        }
         return modelMapper.map(getCurrentExperiment(), ExperimentDto.class);
     }
 

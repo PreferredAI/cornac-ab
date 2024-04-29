@@ -18,7 +18,7 @@ public class OpensearchConfig extends AbstractOpenSearchConfiguration {
     @Bean
     public RestHighLevelClient opensearchClient() {
         final ClientConfiguration clientConfiguration = ClientConfiguration.builder()
-                .connectedTo("localhost:9200")
+                .connectedTo(opensearchProperties.getHost() + ":" + opensearchProperties.getPort())
                 .build();
 
         return RestClients.create(clientConfiguration).rest();
