@@ -16,6 +16,7 @@ import org.opensearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.opensearch.search.aggregations.Aggregation;
 import org.opensearch.search.aggregations.AggregationBuilders;
 import org.opensearch.search.aggregations.bucket.terms.ParsedStringTerms;
+import org.opensearch.search.aggregations.bucket.terms.ParsedTerms;
 import org.opensearch.search.aggregations.bucket.terms.Terms;
 import org.opensearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.opensearch.search.aggregations.metrics.CardinalityAggregationBuilder;
@@ -47,7 +48,7 @@ public class FeedbackRepositoryImpl implements FeedbackRepositoryCustom {
         MatchQueryBuilder queryBuilder = QueryBuilders.matchQuery("experiment_id", experimentId);
 
         TermsAggregationBuilder aggregation = AggregationBuilders.terms("top_items")
-                .field("book_id.keyword")
+                .field("item_id")
                 .size(limit);
 
         SearchSourceBuilder builder = new SearchSourceBuilder().query(queryBuilder).aggregation(aggregation);
@@ -62,7 +63,7 @@ public class FeedbackRepositoryImpl implements FeedbackRepositoryCustom {
         }
 
         Map<String, Aggregation> results = response.getAggregations().asMap();
-        ParsedStringTerms topItems = (ParsedStringTerms) results.get("top_items");
+        ParsedTerms topItems = (ParsedTerms) results.get("top_items");
 
         List<String> keys = topItems.getBuckets()
                 .stream()
@@ -108,8 +109,8 @@ public class FeedbackRepositoryImpl implements FeedbackRepositoryCustom {
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery().must(matchQueryBuilder).must(rangeQueryBuilder).filter(termsQueryBuilder);
 
 
-        CardinalityAggregationBuilder userCountAggregation = AggregationBuilders.cardinality("distinct_users").field("user_id.keyword");
-        CardinalityAggregationBuilder itemCountAggregation = AggregationBuilders.cardinality("distinct_items").field("book_id.keyword");
+        CardinalityAggregationBuilder userCountAggregation = AggregationBuilders.cardinality("distinct_users").field("user_id");
+        CardinalityAggregationBuilder itemCountAggregation = AggregationBuilders.cardinality("distinct_items").field("item_id");
 
         TermsAggregationBuilder modelAggregation = AggregationBuilders.terms("feedbacks").field("model.keyword")
                 .subAggregation(userCountAggregation).subAggregation(itemCountAggregation);
