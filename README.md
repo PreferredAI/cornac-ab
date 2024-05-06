@@ -25,12 +25,18 @@ This solution consists of the following:
 4. OpenSearch & OpenSearch Dashboards
 5. [GoodReads 10k dataset preloaded into OpenSearch](https://github.com/zygmuntz/goodbooks-10k)
 
-## Installation
+## Scope of Repository
 
-To install Cornac-AB, follow these steps:
+This solution spins up Cornac-AB backend and frontend solution. In addition, this also bootstraps and adds sample data from GoodReads 10k dataset into OpenSearch and OpenSearch Dashboards.
+
+## Running the Solution
+
+Running this solution would require [Docker](https://www.docker.com/products/docker-desktop/). After Docker is running, run the following command:
 ```
 docker compose up
 ```
+
+This would bring spin up multiple containers as mentioned in the architecture above, including insertion of the GoodReads dataset into OpenSearch and sample dashboards.
 
 ## Usage
 
