@@ -107,7 +107,7 @@ import 'v-calendar/style.css';
                 <div v-for="index in 12" class="h-4 bg-slate-200 rounded mt-2"></div>
             </div>
             <div v-else class="mt-4 max-h-full w-full overflow-auto overscroll-contain">
-                <iframe id="overview_iframe" src="http://0.0.0.0:5601/app/dashboards#/view/4c3da600-f0cb-11ee-ad50-a7e44edec98b?embed=true&_g=(filters%3A!()%2Cquery%3A(language%3Akuery%2Cquery%3A'')%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'2023-12-08T07%3A39%3A57.280Z'%2Cto%3Anow))&hide-filter-bar=true" height="900" width="100%"></iframe>
+                <iframe id="overview_iframe" src="http://localhost:5601/app/dashboards#/view/4c3da600-f0cb-11ee-ad50-a7e44edec98b?embed=true&_g=(filters%3A!()%2Cquery%3A(language%3Akuery%2Cquery%3A'')%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'2023-12-08T07%3A39%3A57.280Z'%2Cto%3Anow))&hide-filter-bar=true" height="900" width="100%"></iframe>
             </div>
         </div>
         <div class="mt-8">
@@ -325,13 +325,13 @@ export default {
         getRecommendationIframeUrl() {
             var toDate = this.dashboardFilters.timestamp.end.toISOString();
             var fromDate = this.dashboardFilters.timestamp.start.toISOString();
-            return `http://0.0.0.0:5601/app/dashboards#/view/0d1cdc40-ba96-11ee-8517-e5d0135698f5?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'${fromDate}'%2Cto%3A'${toDate}'))&hide-filter-bar=true&_a=(query:(language:kuery,query:'experiment_id:${this.activeExperiment.id}'))`;
+            return `http://localhost:5601/app/dashboards#/view/0d1cdc40-ba96-11ee-8517-e5d0135698f5?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'${fromDate}'%2Cto%3A'${toDate}'))&hide-filter-bar=true&_a=(query:(language:kuery,query:'experiment_id:${this.activeExperiment.id}'))`;
         },
         getFeedbackIframeUrl() {
             var toDate = this.dashboardFilters.timestamp.end.toISOString();
             var fromDate = this.dashboardFilters.timestamp.start.toISOString();
             var models = this.dashboardFilters.model.join(',');
-            return `http://0.0.0.0:5601/app/dashboards#/view/7ae59870-b90b-11ee-8517-e5d0135698f5?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'${fromDate}'%2Cto%3A'${toDate}'))&hide-filter-bar=true&_a=(query:(language:kuery,query:'model:${models}%20and%20experiment_id:${this.activeExperiment.id}'))`;
+            return `http://localhost:5601/app/dashboards#/view/7ae59870-b90b-11ee-8517-e5d0135698f5?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'${fromDate}'%2Cto%3A'${toDate}'))&hide-filter-bar=true&_a=(query:(language:kuery,query:'model:${models}%20and%20experiment_id:${this.activeExperiment.id}'))`;
         },
         runEvaluation() {
             this.$router.push({ 
@@ -347,7 +347,7 @@ export default {
         updateDashboard(fromDate, toDate) {
             fromDate = fromDate.toISOString();
             toDate = toDate.toISOString();
-            document.querySelector('#feedback_iframe').src = `http://0.0.0.0:5601/app/dashboards#/view/7ae59870-b90b-11ee-8517-e5d0135698f5?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'${fromDate}'%2Cto%3A'${toDate}'))&hide-filter-bar=true&_a=(query:(language:kuery,query:'experiment_id:${this.activeExperiment.id}'))`;
+            document.querySelector('#feedback_iframe').src = `http://localhost:5601/app/dashboards#/view/7ae59870-b90b-11ee-8517-e5d0135698f5?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'${fromDate}'%2Cto%3A'${toDate}'))&hide-filter-bar=true&_a=(query:(language:kuery,query:'experiment_id:${this.activeExperiment.id}'))`;
         },
         filterSelected(filter) {
             if (this.dashboardFilters.model.indexOf(filter) > -1) {
