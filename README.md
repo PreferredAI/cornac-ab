@@ -62,6 +62,20 @@ This project welcomes contributions and suggestions. Before contributing, please
 If you use Cornac in a scientific publication, we would appreciate citations to the following papers:
 
 <details>
+  <summary><a href="https://ieeexplore.ieee.org/abstract/document/9354572">Cornac-AB: An Open-Source Recommendation Framework with Native A/B Testing Integration</a>, Ong <i>et al.</i>, In Proceedings of the ACM Web Conference 2024.</summary>
+
+  ```
+  @inproceedings{ong2024cornacab,
+    title={Cornac-AB: An Open-Source Recommendation Framework with Native A/B Testing Integration},
+    author={Ong, Darryl and Truong, Quoc-Tuan and Lauw, Hady W},
+    journal={Proceedings of the ACM Web Conference 2024},
+    pages={xx--yy},
+    year={2024}
+  }
+  ```
+</details>
+
+<details>
   <summary><a href="http://jmlr.org/papers/v21/19-805.html">Cornac: A Comparative Framework for Multimodal Recommender Systems</a>, Salah <i>et al.</i>, Journal of Machine Learning Research, 21(95):1–5, 2020.</summary>
 
   ```
@@ -73,34 +87,6 @@ If you use Cornac in a scientific publication, we would appreciate citations to 
     number={95},
     pages={1--5},
     year={2020}
-  }
-  ```
-</details>
-
-<details>
-  <summary><a href="https://ieeexplore.ieee.org/abstract/document/9354572">Exploring Cross-Modality Utilization in Recommender Systems</a>, Truong <i>et al.</i>, IEEE Internet Computing, 25(4):50–57, 2021.</summary>
-
-  ```
-  @article{truong2021exploring,
-    title={Exploring Cross-Modality Utilization in Recommender Systems},
-    author={Truong, Quoc-Tuan and Salah, Aghiles and Tran, Thanh-Binh and Guo, Jingyao and Lauw, Hady W},
-    journal={IEEE Internet Computing},
-    year={2021},
-    publisher={IEEE}
-  }
-  ```
-</details>
-
-<details>
-  <summary><a href="http://jmlr.org/papers/v21/19-805.html">Multi-Modal Recommender Systems: Hands-On Exploration</a>, Truong <i>et al.</i>, ACM Conference on Recommender Systems, 2021.</summary>
-
-  ```
-  @inproceedings{truong2021multi,
-    title={Multi-modal recommender systems: Hands-on exploration},
-    author={Truong, Quoc-Tuan and Salah, Aghiles and Lauw, Hady},
-    booktitle={Fifteenth ACM Conference on Recommender Systems},
-    pages={834--837},
-    year={2021}
   }
   ```
 </details>
