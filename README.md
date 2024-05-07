@@ -5,15 +5,9 @@
 This tool provides you a solution to let you experiment with different recommendation models, visualize A/B test results, and analyze user interactions.
 
 ## Key Features
-
-**User Interaction Solution**
-<img src="screenshots/demo.png" alt="demo" width="250"/>
-
-**Recommendations Dashboard**
-<img src="screenshots/recommendation-dashboard.png" alt="recommendations" width="250"/>
-
-**Feedback Dashboard**
-<img src="screenshots/feedback-dashboard.png" alt="feedback" width="250"/>
+| User Interaction Solution | Recommendations Dashboard | Feedback Dashboard |
+|:------------------------:|:------------------------:|:------------------:|
+| <img src="screenshots/demo.png" alt="demo" width="250"/> | <img src="screenshots/recommendation-dashboard.png" alt="recommendations" width="250"/> | <img src="screenshots/feedback-dashboard.png" alt="feedback" width="250"/> |
 
 - **OpenSearch Integration**: Provides robust data indexing, retrieval, and visualization.
 - **Easy Experiment Setup**: Effortlessly create A/B tests and collect user feedback, leveraging Cornac’s comprehensive evaluation mechanisms.
