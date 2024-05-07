@@ -23,12 +23,13 @@ public class RecommendLog {
     private String id;
     @Field(type = FieldType.Keyword)
     private Integer experimentId;
-    @Field(type = FieldType.Keyword)
+    @Field(name="user_id", type = FieldType.Keyword)
     private String userId;
     @Field(type = FieldType.Date, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSSSSS||uuuu-MM-dd'T'HH:mm:ss.SSS||uuuu-MM-dd'T'HH:mm:ss||uuuu-MM-dd", format = {})
     private LocalDateTime timestamp;
     @Field(type = FieldType.Keyword)
     private List<String> recommendations;
+    private String model;
 
     private boolean isFallback;
     private String fallbackReason;

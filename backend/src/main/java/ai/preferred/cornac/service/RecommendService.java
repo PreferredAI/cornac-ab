@@ -129,6 +129,7 @@ public class RecommendService {
         log.setUserId(userId);
         log.setTimestamp(LocalDateTime.now());
         log.setRecommendations(recommendation.getRecommendations());
+        log.setModel(cornacInstance == null ? "unallocated" : cornacInstance.getServiceName());
 
         RecommendLog recommendLog = recommendLogRepository.save(log);
         return convertToRecommendLogDto(recommendLog);

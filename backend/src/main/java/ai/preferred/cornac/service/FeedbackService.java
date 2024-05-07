@@ -36,14 +36,6 @@ public class FeedbackService {
         UserAbAllocation userAbAllocation = userAbAllocationRepository.findByExperimentIdAndUserId(
                 recommendLog.getExperimentId(), recommendLog.getUserId()
         );
-        List<CornacInstance> cornacInstances = cornacInstanceRepository.findCornacInstanceByExperimentId(recommendLog.getExperimentId());
-
-        String cornacInstanceName;
-        if (userAbAllocation == null) {
-            cornacInstanceName = "unallocated";
-        } else {
-            cornacInstanceName = cornacInstances.get(userAbAllocation.getAbGroup()).getServiceName();
-        }
 
         Feedback feedback = new Feedback();
         feedback.setItemId(itemId);
@@ -51,7 +43,8 @@ public class FeedbackService {
         feedback.setUserId(recommendLog.getUserId());
         feedback.setTimestamp(LocalDateTime.now());
         feedback.setExperimentId(recommendLog.getExperimentId());
-        feedback.setModel(cornacInstanceName);
+        feedback.setModel(recommendLog.getModel());
+        feedback.setRecommendationId(recommendId);
         feedback.setAction(action);
 
         return feedbackRepository.save(feedback);

@@ -371,6 +371,9 @@ public class CornacService {
                 .body(BodyInserters.fromValue(evaluationRequest))
                 .retrieve()
                 .bodyToMono(CornacEvaluationResponse.class)
+                .doOnError(error -> {
+                    error.printStackTrace();
+                })
                 .block();
     }
 
