@@ -72,7 +72,7 @@ def bulk_insert_data(index_name, data):
     return response
 
 def str_to_array(s):
-    return s[1:-1].split(',')
+    return s[1:-1].split(', ')
 
 def read_recommendations():
     file_path = "recommendations.csv"
@@ -82,6 +82,7 @@ def read_recommendations():
     df["rec_ids"] = df["rec_ids"].apply(str_to_array)
     df["experiment_id"] = [1] * len(df)
     df["model"] = df["user_id"].apply(lambda x: model_list[int(x) % len(model_list)])
+    df["user_id"] = df["user_id"].apply(lambda x: str(x))
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     
     data = df.to_dict(orient="records")
@@ -116,6 +117,9 @@ def read_feedback():
     df["experiment_id"] = [1] * len(df)
     df["rating"] = df["rating"].apply(lambda x: int(x))
     df["model"] = df["user_id"].apply(lambda x: model_list[int(x) % len(model_list)])
+    df["user_id"] = df["user_id"].apply(lambda x: str(x))
+    df["item_id"] = df["item_id"].apply(lambda x: str(x))
+    df["recommendation_id"] = df["recommendation_id"].apply(lambda x: str(x))
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     
     data = df.to_dict(orient="records")
