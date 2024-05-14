@@ -27,8 +27,8 @@ Cornac is endorsed by ACM RecSys for evaluating and reproducing recommendation a
 The architecture consists of the following components:
 
 1. **Cornac-AB Backend Server** ([Backend source code](backend)): Handles API endpoints and business logic.
-2. **Cornac-AB Frontend** ([Frontend source code](frontend)): Offers a user interface for interacting with the A/B tests.
-3. **Books-AB User Interaction Frontend** ([User Interaction Frontend source code](democlient)): Provides a frontend for user interactions.
+2. **Books-AB User Interaction Frontend** ([User Interaction Frontend source code](democlient)): Provides a frontend for user interactions.
+3. **Cornac-AB Frontend** ([Frontend source code](frontend)): Offers a user interface to setup, track and evaluate models for the A/B tests.
 4. **OpenSearch & OpenSearch Dashboards** ([Official site](https://opensearch.org)): Data indexing, search, and visualization.
 5. **GoodReads 10k Dataset** ([Goodbooks-10k repository](https://github.com/zygmuntz/goodbooks-10k)): Preloaded data for demonstration purposes.
 
@@ -40,16 +40,17 @@ docker compose up
 ```
 This command will start all the required components and load the GoodReads dataset into OpenSearch for A/B testing and visualization.
 
-## Accessing the Solution
+## Usage Guide
+
+### Accessing the Solution
 
 Once the containers are running, you can access the various parts of the solution via the following URLs:
-- Cornac-AB Backend Server `localhost:8080`
-- Cornac-AB Frontend `localhost:8081`
-- Books-AB User Interaction Frontend `localhost:8082`
+- [Books-AB User Interaction Frontend](#2) `localhost:8082`
+- [Cornac-AB Frontend]() `localhost:8081`
 - OpenSearch API `localhost:9200`
 - OpenSearch Dashboards `localhost:5601`
 
-#### 1. Cornac-AB Backend
+### 1. Cornac-AB Backend
 
 This backend server is built on [Spring](https://spring.io/). Spring is a production grade scalable framework for building web applications.
 
@@ -59,48 +60,71 @@ This solution connects to a local h2 database (which could be easily replaceable
 
 The [Spring Data OpenSearch](https://github.com/opensearch-project/spring-data-opensearch) library has been used to connect the backend to the OpenSearch service.
 
-#### 2. Cornac-AB Frontend
+### 2. Books-AB User Interaction Frontend
 
-<img src="screenshots/frontend-1.png" alt="demo" width="500"/> 
+#### Accessing the frontend
+http://localhost:8082/
 
-The frontend is accessed on [this site](localhost:8081). You'll be welcomed with this screen.
+Included in this solution is a sample frontend that showcases how the solution receives user interactions.
 
-<img src="screenshots/frontend-2.png" alt="demo" width="500"/>
-
-Going to the dashboard screen will show you multiple dashboards, including the Users, Recommendations and Feedback dashboards. Sample data based on the Goodbooks 10k dataset has already been generated and inserted for you.
-
-<img src="screenshots/frontend-3.png" alt="demo" width="500"/>
-Under the Feedback Dashboard section, you will be able to filter data, and further compare your models using the Cornac evaluation features by selecting the **Run Cornac Evaluation** button.
-
-<img src="screenshots/frontend-4.png" alt="demo" width="500"/>
-A summary of the data that will be put through Cornac's evaluation services will be shown. You could add more metrics by selecting the **Add Metric** button will allow you to add more metrics as shown below.
-
-<img src="screenshots/frontend-5.png" alt="demo" width="300"/>
-
-<img src="screenshots/frontend-6.png" alt="demo" width="500"/>
-You will then be shown with the metric results, along with the p-values of individual models to evaluate the performance of your models.
-
-#### 3. Books-AB User Interaction Frontend
-
-Included in this solution is a sample frontend that showcases how users will use this solution.
+#### A. Selecting a User ID
 
 <img src="screenshots/demo-1.png" alt="demo" width="500"/> 
 
 Users will first enter their User ID. To decrease the size of the sample data, we only included past book history data of user IDs 100-199.
 
+#### B. Viewing Books Recommendations
 <img src="screenshots/demo-2.png" alt="demo" width="500"/> 
 
-Click **Explore Books**. Users will then be shown with multiple books, in which they could select to view more details by clicking on them. A single display of this books constitutes to 1 recommendation.
+Click **Explore Books**. A particular model is allocated by the backend, which provides recommendations as on this explore page. Recommendation records are stored in OpenSearch as well. 
+
+#### C. Providing Book Feedback
+Users could select to view more details by clicking on them.
 
 <img src="screenshots/demo-3.png" alt="demo" width="500"/> 
 
-When a user clicks on a book, we register that as a feedback. This feedback will be attributed with the **click** action.
+When a user clicks on a book, we register that as a feedback. This feedback will be attributed with the **click** action on OpenSearch.
 
 <img src="screenshots/demo-4.png" alt="demo" width="500"/>  
 
-Further in this view, users will be able to rate the book by click the stars icon, which will be attributed with a **rate** action as a feedback.
+Further in this view, users will be able to rate the book by click the stars icon, which will be attributed with a **rate** action as a feedback on OpenSearch.
 
-User interaction in this frontend will be recorded in OpenSearch as **recommendations** and **feedbacks**. These can be viewed in the Cornac-AB frontend dashboards in real-time.
+#### D. Viewing User Interactions
+
+
+User interaction in this frontend will be recorded in OpenSearch as **recommendations** and **feedbacks**. These can be viewed in the Cornac-AB frontend dashboards in real-time, as shown in the next section.
+
+#### 3. Cornac-AB Frontend
+
+#### Accessing the frontend
+http://localhost:8081/
+
+<img src="screenshots/frontend-1.png" alt="demo" width="500"/> 
+
+You'll be welcomed with this screen.
+
+#### A. Viewing the Dashboards
+
+<img src="screenshots/frontend-2.png" alt="demo" width="500"/>
+
+Going to the dashboard screen will show you multiple dashboards, including the Users, Recommendations and Feedback dashboards. Sample data based on the Goodbooks 10k dataset has already been generated and inserted for you.
+
+#### B. Evaluating your Models
+<img src="screenshots/frontend-3.png" alt="demo" width="500"/>
+
+Under the Feedback Dashboard section, you will be able to filter data, and further compare your models using the Cornac evaluation features by selecting the **Run Cornac Evaluation** button.
+
+<img src="screenshots/frontend-4.png" alt="demo" width="500"/>
+
+A summary of the data that will be put through Cornac's evaluation services will be shown. You could add more metrics by selecting the **Add Metric** button will allow you to add more metrics as shown below.
+
+<img src="screenshots/frontend-5.png" alt="demo" width="300"/>
+
+#### C. Viewing Evaluation Results
+
+<img src="screenshots/frontend-6.png" alt="demo" width="500"/>
+
+You will then be shown with the metric results, along with the p-values of individual models to evaluate the performance of your models.
 
 ## Further Usage
 
