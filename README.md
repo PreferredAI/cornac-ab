@@ -49,6 +49,59 @@ Once the containers are running, you can access the various parts of the solutio
 - OpenSearch API `localhost:9200`
 - OpenSearch Dashboards `localhost:5601`
 
+#### 1. Cornac-AB Backend
+
+This backend server is built on [Spring](https://spring.io/). Spring is a production grade scalable framework for building web applications.
+
+This solution connects to a local h2 database (which could be easily replaceable with most SQL databases supported by Spring).
+
+[Cornac instances](https://cornac.readthedocs.io/en/stable/user/iamadeveloper.html#running-an-api-service) (Based on Flask) are run on this container, and restarts automatically should it be found to be down.
+
+The [Spring Data OpenSearch](https://github.com/opensearch-project/spring-data-opensearch) library has been used to connect the backend to the OpenSearch service.
+
+#### 2. Cornac-AB Frontend
+
+<img src="screenshots/frontend-1.png" alt="demo" width="500"/> 
+
+The frontend is accessed on [this site](localhost:8081). You'll be welcomed with this screen.
+
+<img src="screenshots/frontend-2.png" alt="demo" width="500"/>
+
+Going to the dashboard screen will show you multiple dashboards, including the Users, Recommendations and Feedback dashboards. Sample data based on the Goodbooks 10k dataset has already been generated and inserted for you.
+
+<img src="screenshots/frontend-3.png" alt="demo" width="500"/>
+Under the Feedback Dashboard section, you will be able to filter data, and further compare your models using the Cornac evaluation features by selecting the **Run Cornac Evaluation** button.
+
+<img src="screenshots/frontend-4.png" alt="demo" width="500"/>
+A summary of the data that will be put through Cornac's evaluation services will be shown. You could add more metrics by selecting the **Add Metric** button will allow you to add more metrics as shown below.
+
+<img src="screenshots/frontend-5.png" alt="demo" width="300"/>
+
+<img src="screenshots/frontend-6.png" alt="demo" width="500"/>
+You will then be shown with the metric results, along with the p-values of individual models to evaluate the performance of your models.
+
+#### 3. Books-AB User Interaction Frontend
+
+Included in this solution is a sample frontend that showcases how users will use this solution.
+
+<img src="screenshots/demo-1.png" alt="demo" width="500"/> 
+
+Users will first enter their User ID. To decrease the size of the sample data, we only included past book history data of user IDs 100-199.
+
+<img src="screenshots/demo-2.png" alt="demo" width="500"/> 
+
+Click **Explore Books**. Users will then be shown with multiple books, in which they could select to view more details by clicking on them. A single display of this books constitutes to 1 recommendation.
+
+<img src="screenshots/demo-3.png" alt="demo" width="500"/> 
+
+When a user clicks on a book, we register that as a feedback. This feedback will be attributed with the **click** action.
+
+<img src="screenshots/demo-4.png" alt="demo" width="500"/>  
+
+Further in this view, users will be able to rate the book by click the stars icon, which will be attributed with a **rate** action as a feedback.
+
+User interaction in this frontend will be recorded in OpenSearch as **recommendations** and **feedbacks**. These can be viewed in the Cornac-AB frontend dashboards in real-time.
+
 ## Further Usage
 
 Cornac-AB is a solution which showcases how A/B Testing could be done and visualized as a forward testing experiment. Feel free to further contribute, or fork the repository and extend it to your own application needs.
