@@ -26,6 +26,8 @@ public class Feedback {
     private String userId;
     @Field(name="item_id", type = FieldType.Keyword)
     private String itemId;
+    @Field(name="recommendation_id", type = FieldType.Keyword)
+    private String recommendationId;
     private String model;
     private Integer rating;
     private String action; // 'click', 'rating'
