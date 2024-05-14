@@ -288,11 +288,11 @@ export default {
             ],
             dashboardFilters:{
                 timestamp: {
-                    start: new Date(2023, 11, 23),
-                    end: new Date(2024, 0, 11),
+                    start:  new Date(new Date().setDate(new Date().getDate() - 14)),
+                    end: new Date(),
                     // end: new Date(),
                 },
-                model: ["BPR", "BiVAECF", "LightGCN"],
+                model: ["BPR", "LightGCN"],
             },
         }
     },

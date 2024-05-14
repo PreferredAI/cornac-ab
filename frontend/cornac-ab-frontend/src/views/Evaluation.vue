@@ -200,15 +200,16 @@ const openModal = () => {
 <script>
 export default {
     mounted() {
+        this.dateFrom = new Date(this.$route.query.dateFrom);
+        this.dateTo = new Date(this.$route.query.dateTo);
+        this.experimentId = this.$route.query.experimentId;
+        this.models = this.$route.query.models;
+
         if (!this.$route.query.dateFrom || !this.$route.query.dateTo || !this.$route.query.experimentId || !this.$route.query.models) {
             this.returnToDashboard();
         } else {
             this.loadFeedbackSummaryData();
         }
-        this.dateFrom = new Date(this.$route.query.dateFrom);
-        this.dateTo = new Date(this.$route.query.dateTo);
-        this.experimentId = this.$route.query.experimentId;
-        this.models = this.$route.query.models;
     },
     data() {
         return {
