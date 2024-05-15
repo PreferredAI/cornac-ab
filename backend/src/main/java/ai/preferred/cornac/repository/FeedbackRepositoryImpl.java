@@ -48,7 +48,7 @@ public class FeedbackRepositoryImpl implements FeedbackRepositoryCustom {
         MatchQueryBuilder queryBuilder = QueryBuilders.matchQuery("experiment_id", experimentId);
 
         TermsAggregationBuilder aggregation = AggregationBuilders.terms("top_items")
-                .field("item_id")
+                .field("item_id.keyword")
                 .size(limit);
 
         SearchSourceBuilder builder = new SearchSourceBuilder().query(queryBuilder).aggregation(aggregation);
@@ -109,8 +109,8 @@ public class FeedbackRepositoryImpl implements FeedbackRepositoryCustom {
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery().must(matchQueryBuilder).must(rangeQueryBuilder).filter(termsQueryBuilder);
 
 
-        CardinalityAggregationBuilder userCountAggregation = AggregationBuilders.cardinality("distinct_users").field("user_id");
-        CardinalityAggregationBuilder itemCountAggregation = AggregationBuilders.cardinality("distinct_items").field("item_id");
+        CardinalityAggregationBuilder userCountAggregation = AggregationBuilders.cardinality("distinct_users").field("user_id.keyword");
+        CardinalityAggregationBuilder itemCountAggregation = AggregationBuilders.cardinality("distinct_items").field("item_id.keyword");
 
         TermsAggregationBuilder modelAggregation = AggregationBuilders.terms("feedbacks").field("model.keyword")
                 .subAggregation(userCountAggregation).subAggregation(itemCountAggregation);
