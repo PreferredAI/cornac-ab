@@ -139,14 +139,14 @@ This project welcomes contributions and suggestions. Before contributing, please
 If you use Cornac in a scientific publication, we would appreciate citations to the following papers:
 
 <details>
-  <summary><a href="https://ieeexplore.ieee.org/abstract/document/9354572">Cornac-AB: An Open-Source Recommendation Framework with Native A/B Testing Integration</a>, Ong <i>et al.</i>, In Proceedings of the ACM Web Conference 2024.</summary>
+  <summary><a href="https://dl.acm.org/doi/10.1145/3589335.3651241">Cornac-AB: An Open-Source Recommendation Framework with Native A/B Testing Integration</a>, Ong <i>et al.</i>, In Companion Proceedings of the ACM Web Conference 2024.</summary>
 
   ```
   @inproceedings{ong2024cornacab,
     title={Cornac-AB: An Open-Source Recommendation Framework with Native A/B Testing Integration},
-    author={Ong, Darryl and Truong, Quoc-Tuan and Lauw, Hady W},
-    journal={Proceedings of the ACM Web Conference 2024},
-    pages={xx--yy},
+    author={Ong, Darryl and Truong, Quoc-Tuan and Lauw, Hady W.},
+    booktitle={Companion Proceedings of the ACM on Web Conference 2024},
+    pages={1027–1030},
     year={2024}
   }
   ```
