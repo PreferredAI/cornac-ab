@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import org.springframework.web.ErrorResponseException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -59,7 +61,11 @@ public class ExperimentService {
     public ExperimentDto getActiveExperiment(){
         Experiment experiment = getCurrentExperiment();
         if (experiment == null) {
-            throw new ErrorResponseException(HttpStatus.NOT_FOUND, new RuntimeException("No running experiment found"));
+            throw new ErrorResponseException(
+                    HttpStatus.NOT_FOUND,
+                    ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, "No running experiment found"),
+                    new RuntimeException("No running experiment found")
+            );
         }
         return modelMapper.map(getCurrentExperiment(), ExperimentDto.class);
     }
@@ -77,13 +83,13 @@ public class ExperimentService {
     }
 
     @Transactional
-    public Experiment createNewExperiment(Long userSeed, List<String> modelName, List<String> modelClass, List<MultipartFile> file){
+    public Experiment createNewExperiment(Long userSeed, List<String> modelName, List<MultipartFile> file) {
         // 1. First create and save experiment instance
         Experiment experiment = saveExperiment(userSeed);
 
         // 2. Create cornac instances for each model uploaded
         for (int i = 0; i < modelName.size(); i++) {
-            cornacService.createCornacInstance(modelName.get(i), modelClass.get(i), experiment.getId(), file.get(i));
+            cornacService.createCornacInstance(modelName.get(i), experiment.getId(), file.get(i));
         }
         // 3. Allocate users into instances and start the experiment
         cornacService.allocateUsersToInstances(experiment);
@@ -126,7 +132,7 @@ public class ExperimentService {
 
                 LOGGER.info("Restarting Cornac instance {}", cornacInstance.getServiceName());
 
-                cornacService.startCornacInstance(cornacInstance.getServiceName(), cornacInstance.getModelClass(), experiment, true);
+                cornacService.startCornacInstance(cornacInstance.getServiceName(), experiment, true);
 
                 return;
             }

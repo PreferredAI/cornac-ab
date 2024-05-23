@@ -44,9 +44,9 @@ public class ExperimentController {
 //                                          @RequestParam(name = "endDateTime") Date endDateTime,
                                           @RequestParam(name = "userSeed", defaultValue = "123") Long userSeed,
                                           @RequestParam(name = "name", defaultValue = "model") List<String> modelName,
-                                          @RequestParam(name = "modelClass") List<String> modelClass,
+//                                          @RequestParam(name = "modelClass") List<String> modelClass,
                                           @RequestParam("file") List<MultipartFile> file) {
-        return experimentService.createNewExperiment(userSeed, modelName, modelClass, file);
+        return experimentService.createNewExperiment(userSeed, modelName, file);
     }
 
     @RequestMapping(value = "/instance", method = RequestMethod.GET)
