@@ -27,7 +27,7 @@
                         <svg v-else class="w-4 h-4 me-2 text-green-500 dark:text-green-400 flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
                         </svg>
-                        Spinning up your model: {{model.name}} - cornac.models.{{ model.class }}
+                        Spinning up your model: {{model.name}}
                     </li>
                 </div>
             </ul>
@@ -200,37 +200,51 @@ export default {
         submitForm(e) {
             this.isLoading = true;
 
-            createNewExperiment({userSeed: 123}).then((response) => {
-                this.isExperimentCreated = true;
-                console.log("Experiment created");
+            const formData = new FormData();
+            formData.append('userSeed', 123);
 
-                this.models.forEach((model) => {
-                const formData = new FormData();
+            this.models.forEach((model) => {
                 formData.append('name', model.name);
-                formData.append('modelClass', "cornac.models." + model.class);
-
-                // formData.append('modelClass', "cornac.models.MF");
                 formData.append('file', model.file);
-                createCornacInstance(formData).then((response) => {
-                    model.isModelReady = true;
-                    console.log("Model" + model.name + "created");
-
-                    this.loadedModelCount++;
-
-                    if (this.loadedModelCount == this.models.length) {
-                        // redirect to dashboard
-                        console.log("All models loaded");
-                        this.$router.push('/dashboard');
-                    }
-                }).catch(function(error){
-                    console.log(error);
-                    this.isLoading = false;
-                });
             });
+
+            createNewExperiment(formData).then((response) => {
+                this.$router.push('/dashboard');
             }).catch(function(error){
+                this.isLoading
                 console.log(error);
-                this.isLoading = false;
             });
+
+            // createNewExperiment({userSeed: 123}).then((response) => {
+            //     this.isExperimentCreated = true;
+            //     console.log("Experiment created");
+
+            //     this.models.forEach((model) => {
+            //     const formData = new FormData();
+            //     formData.append('name', model.name);
+
+            //     // formData.append('modelClass', "cornac.models.MF");
+            //     formData.append('file', model.file);
+            //     createCornacInstance(formData).then((response) => {
+            //         model.isModelReady = true;
+            //         console.log("Model" + model.name + "created");
+
+            //         this.loadedModelCount++;
+
+            //         if (this.loadedModelCount == this.models.length) {
+            //             // redirect to dashboard
+            //             console.log("All models loaded");
+            //             this.$router.push('/dashboard');
+            //         }
+            //     }).catch(function(error){
+            //         console.log(error);
+            //         this.isLoading = false;
+            //     });
+            // });
+            // }).catch(function(error){
+            //     console.log(error);
+            //     this.isLoading = false;
+            // });
 
             e.preventDefault();
         }

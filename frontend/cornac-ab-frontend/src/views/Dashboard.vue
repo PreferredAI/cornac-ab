@@ -29,6 +29,17 @@ import 'v-calendar/style.css';
             </div>
         </div>
     </div>
+    <div v-else-if="!activeExperiment" class="mt-4 bg-white p-4 rounded dark:bg-slate-500">
+        <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Start a New Experiment</h2>
+        <p class="text-lg text-gray-900 dark:text-white">No running experiments found. Upload your models to begin a new one!</p>
+
+        <div class="mt-6 flex items-center justify-start gap-x-6 col-span-12">
+            <button v-on:click="redirectToSetup" type="button" class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                <Cog6ToothIcon class="-ml-0.5 mr-1.5 h-5 w-5 text-white-400" aria-hidden="true" />
+                Start a New Experiment
+            </button>
+        </div>
+    </div>
     <div v-else class="container mx-auto p-4">
         <header class="bg-white shadow dark:bg-slate-800 dark:shadow-slate-500">
             <div class="mx-auto px-4 py-6 sm:px-6 lg:px-8">
@@ -40,10 +51,6 @@ import 'v-calendar/style.css';
                 <Cog6ToothIcon class="-ml-0.5 mr-1.5 h-5 w-5 text-white-400" aria-hidden="true" />
                 Start a New Experiment
             </button>
-        </div>
-        <div v-if="!activeExperiment" class="mt-4 bg-white p-4 rounded dark:bg-slate-500">
-            <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Start a New Experiment</h2>
-            <p class="text-lg text-gray-900 dark:text-white">No running experiments found. Upload your models to begin a new one!</p>
         </div>
         <div class="lg:grid lg:gap-4">
             <div class="mt-4 col-span-12">
@@ -314,7 +321,7 @@ export default {
                 this.isLoading = false;
 
             }).catch((error) => {
-                if (error.indexOf("No running experiment found") !== -1) {
+                if (error.response.data.status === 404 && error.response.data.message.indexOf("No running experiment found") !== -1) {
                     this.activeExperiment = null;
                 } else {
                     this.error = error;
