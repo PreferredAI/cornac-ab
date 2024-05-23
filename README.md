@@ -38,6 +38,12 @@ To get started with Cornac-AB, you need [Docker](https://www.docker.com/products
 ```bash
 docker compose up
 ```
+
+To run solution without sample dataset:
+```bash
+docker compose -f docker-compose-nodata.yml up
+```
+
 This command will start all the required components and load the GoodReads dataset into OpenSearch for A/B testing and visualization.
 
 ## Usage Guide
