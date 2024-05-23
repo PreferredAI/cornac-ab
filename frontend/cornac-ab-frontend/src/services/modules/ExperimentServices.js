@@ -1,8 +1,10 @@
 import {axios} from '../axios'
 
-export const createNewExperiment = (userSeed) => {
-    return axios.post('/experiment/', {
-        userSeed: userSeed,
+export const createNewExperiment = (formData) => {
+    return axios.post('/experiment/', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
     });
 }
 

@@ -8,6 +8,9 @@ import ai.preferred.cornac.repository.DemoUserRepository;
 import ai.preferred.cornac.repository.ExperimentRepository;
 import ai.preferred.cornac.repository.UserAbAllocationRepository;
 import ai.preferred.cornac.util.FileUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.handler.logging.LogLevel;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -64,8 +67,9 @@ public class CornacService {
     private CornacProperties cornacProperties;
 
     @Transactional
-    public CornacInstanceDto createCornacInstance(String name, String modelClass, Integer experimentId, MultipartFile file) {
+    public CornacInstanceDto createCornacInstance(String name, Integer experimentId, MultipartFile file) {
 
+        // Do OS Checks
         boolean isWindows = System.getProperty("os.name")
                 .toLowerCase()
                 .startsWith("windows");
@@ -76,8 +80,10 @@ public class CornacService {
             System.exit(0);
         }
 
+        // Get Experiment details
         Experiment experiment = experimentRepository.findById(experimentId).get();
 
+        // Check if file attached is a zip file
         if (!FileUtil.isFileExtension(file, ".zip")){
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -85,62 +91,57 @@ public class CornacService {
             );
         }
 
-        storeFileInTemp(file, modelClass + "-" + name);
-        try {
-            FileUtil.unzipFile(cornacProperties.getUploadDir() + "/" + modelClass + "-" + name + "/file.zip", "uploads/" + modelClass + "-" + name + "/output/", true);
-        } catch (IOException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Unable to unzip file. Please try again."
-            );
-        }
+//        storeFileInTemp(file, name);
+//        unzipFile(cornacProperties.getUploadDir() + "/" + name + "/file.zip", "uploads/" + name + "/output/", true);
 
-        return startCornacInstance(name, modelClass, experiment, false);
+        return startCornacInstance(name, experiment, false);
     }
 
     @Transactional
-    public CornacInstanceDto startCornacInstance(String name, String modelClass, Experiment experiment, boolean isRestart) {
+    public CornacInstanceDto startCornacInstance(String name, Experiment experiment, boolean isRestart) {
 
         boolean isWindows = System.getProperty("os.name")
                 .toLowerCase()
                 .startsWith("windows");
 
-        String modelFolder = cornacProperties.getUploadDir()
-                + "/" + modelClass + "-" + name + "/output/";
         int port;
 
         try (ServerSocket serverSocket = new ServerSocket(0)){
-            port = serverSocket.getLocalPort();
-
+            port = serverSocket.getLocalPort(); // get a random available port
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
+        String directory = cornacProperties.getUploadDir()
+                + "/" + name;
+
         // unzip file
-        try {
-            System.out.println("unzipping file...");
-            String directory = cornacProperties.getUploadDir()  + "/" + modelClass + "-" + name;
-            FileUtil.unzipFile(directory + "/file.zip", directory + "/output/", true);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Unable to unzip file. Please try again."
-            );
-        }
+        unzipFile(directory + "/file.zip", directory + "/output/", true);
+        directory = directory + "/output/";
+
+        // find directory with pkl files (in case if the directory is nested)
+        directory = findDirectoryWithExt(directory, ".pkl");
+
+        // check if .meta file exist
+        checkIfFileWithExtExists(directory, ".meta");
+
+        Map<String, String> metaMap = getMetadataMap(directory);
+
+        String modelClass = "cornac.models." + metaMap.get("model_classname");
+
 
         ProcessBuilder builder = new ProcessBuilder();
 
         if (isWindows) {
             // windows cmd file is not yet included.
-            builder.command("cmd.exe", "cornac-run.cmd", Integer.toString(port), modelFolder, modelClass);
+            builder.command("cmd.exe", "cornac-run.cmd", Integer.toString(port), directory, modelClass);
         } else {
-            builder.command("sh", cornacProperties.getExecutableDir() + "/cornac-run.sh", Integer.toString(port), modelFolder, modelClass);
+            builder.command("sh", cornacProperties.getExecutableDir() + "/cornac-run.sh", Integer.toString(port), directory, modelClass);
         }
 
         try {
             Process process = builder.start();
-            LOGGER.info("Starting service at port: {}", port);
+            LOGGER.info("Starting service '{}' ({}) class: '{}', at port: {}", name, directory, modelClass, port);
 
             if (process.waitFor(10, TimeUnit.SECONDS)){
                 LOGGER.info("Service failed to start.");
@@ -159,11 +160,85 @@ public class CornacService {
                 return new CornacInstanceDto(cornacInstance.getServiceName(), cornacInstance.getPort(), "Running" );
             }
 
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Map<String, String> getMetadataMap(String directory) {
+        // read meta file
+        String metaFile = getFileWithExt(directory, ".meta");
+        try (BufferedReader reader = Files.newBufferedReader(Paths.get(metaFile))){
+//            List<String> metaLines = reader.lines().collect(Collectors.toList());
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readValue(reader, JsonNode.class);
+
+            return mapper.convertValue(jsonNode, new TypeReference<>() {}); // convert to hashmap
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void unzipFile(String fileDir, String outputFolder, boolean ignoreFolders) throws ResponseStatusException {
+        try {
+            FileUtil.unzipFile(fileDir, outputFolder, ignoreFolders);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Unable to unzip file. Please try again."
+            );
+        }
+    }
+
+    private String getFileWithExt(String directory, String ext) {
+        try (Stream<Path> paths = Files.walk(Paths.get(directory))) {
+            Optional<Path> path = paths
+                    .filter(Files::isReadable)
+                    .filter(Files::isRegularFile)
+                    .filter(p -> p.getFileName().toString().endsWith(ext))
+                    .findFirst();
+            if (path.isPresent()){
+                return path.get().toString();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        throw new ErrorResponseException(HttpStatus.BAD_REQUEST,
+                new RuntimeException("File with extension " + ext + " not found in directory.")
+        );
+    }
+
+    private String findDirectoryWithExt(String directory, String ext) {
+        try (Stream<Path> paths = Files.walk(Paths.get(directory))) {
+            Optional<Path> path = paths.filter(p -> p.toString().endsWith(ext)).findFirst();
+            if (path.isPresent()){
+                return path.get().getParent().toString();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        throw new ErrorResponseException(HttpStatus.BAD_REQUEST,
+                new RuntimeException("File with extension " + ext + " not found in directory.")
+        );
+    }
+
+    private void checkIfFileWithExtExists(String directory, String ext) {
+        try (Stream<Path> paths = Files.walk(Paths.get(directory))) {
+            if (paths.anyMatch(path -> path.toString().endsWith(ext))){
+                return;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        throw new ErrorResponseException(HttpStatus.BAD_REQUEST,
+                new RuntimeException("File with extension " + ext + " not found in directory.")
+        );
     }
 
     private List<String> readOutput(InputStream inputStream) throws IOException {

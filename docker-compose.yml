@@ -89,7 +89,7 @@ services:
       - opensearch-net
 
   cornac-ab-backend:
-    image: ghcr.io/preferredai/cornac-ab-backend:0.9.1
+    image: ghcr.io/preferredai/cornac-ab-backend:0.9.2
     container_name: cornac-ab-backend
     restart: on-failure
     environment:
@@ -114,7 +114,7 @@ services:
       - cornac-ab-net
 
   cornac-ab-frontend:
-    image: ghcr.io/preferredai/cornac-ab-frontend:0.9
+    image: ghcr.io/preferredai/cornac-ab-frontend:0.9.1
     container_name: cornac-ab-frontend
     restart: on-failure
     ports:
