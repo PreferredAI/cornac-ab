@@ -65,12 +65,12 @@ def bulk_insert_data(index_name, data):
 def str_to_array(s):
     return s[1:-1].split(', ')
 
-def read_recommendations():
-    file_path = "recommendations.csv"
-
-    df = pd.read_csv(file_path)
+def read_recommendations(df):    
+    if df is None:
+        file_path = "recommendations.csv"
+        df = pd.read_csv(file_path)
+        df["rec_ids"] = df["rec_ids"].apply(str_to_array)
     
-    df["rec_ids"] = df["rec_ids"].apply(str_to_array)
     df["experiment_id"] = [1] * len(df)
     df["model"] = df["user_id"].apply(lambda x: model_list[int(x) % len(model_list)])
     df["user_id"] = df["user_id"].apply(lambda x: str(x))
@@ -78,10 +78,10 @@ def read_recommendations():
     
     return df.to_dict(orient="records")
 
-def read_feedback():
-    file_path = "feedbacks.csv"
-
-    df = pd.read_csv(file_path)
+def read_feedback(df):
+    if df is None:
+        file_path = "feedbacks.csv"
+        df = pd.read_csv(file_path)
     
     df["experiment_id"] = [1] * len(df)
     df["rating"] = df["rating"].apply(lambda x: int(x))
@@ -121,16 +121,22 @@ def read_items():
 
     return data
 
-def add_to_opensearch():
+def add_to_opensearch(df_recommendations = None, df_feedbacks = None):
     print("reading recommendations...")
-    rec_data = read_recommendations()
+    rec_data = read_recommendations(df_recommendations)
     print("inserting recommendations data...")
-    bulk_insert_data_parallel("recommendations", rec_data)
+    for i in range(0, len(rec_data), 500000):
+        print(f"Inserting {i} to {i+500000} records")
+        bulk_insert_data_parallel("recommendations", rec_data[i:i+500000])
+    # bulk_insert_data_parallel("recommendations", rec_data)
     
     print("reading feedbacks...")
-    feedback_data = read_feedback()
+    feedback_data = read_feedback(df_feedbacks)
     print("inserting feedbacks data...")
-    bulk_insert_data_parallel("feedback", feedback_data)
+    for i in range(0, len(feedback_data), 500000):
+        print(f"Inserting {i} to {i+500000} records")
+        bulk_insert_data_parallel("feedback", feedback_data[i:i+500000])
+    # bulk_insert_data_parallel("feedback", feedback_data)
     
     print("reading users...")
     user_data = read_users()

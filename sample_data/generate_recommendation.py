@@ -13,7 +13,7 @@ def generate_rec_ids(item_id):
         item_ids[random_index] = item_id
     return item_ids
 
-def generate_recommendations_csv():
+def generate_recommendations_csv(save_csv=True, df_feedbacks=None):
     global popular_books
     
     # Define the input and output CSV file paths
@@ -28,7 +28,8 @@ def generate_recommendations_csv():
     popular_books = df_popular_books['book_id'].tolist()
 
     print("processing feedbacks..")
-    df_feedbacks = pd.read_csv(input_csv_file_path)
+    if df_feedbacks is None:
+        df_feedbacks = pd.read_csv(input_csv_file_path)
 
     series_ids = df_feedbacks["recommendation_id"]
     series_timestamps = df_feedbacks["timestamp"]
@@ -70,8 +71,11 @@ def generate_recommendations_csv():
 
     df_recommendations = pd.concat([df_recommendations, df_add_recommendations])
 
-    print("writing to csv..")
-    df_recommendations.to_csv(output_csv_file_path, index=False)
+    if save_csv:
+        print("writing to csv..")
+        df_recommendations.to_csv(output_csv_file_path, index=False)
+    
+    return df_recommendations
 
 
 if __name__ == "__main__":

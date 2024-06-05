@@ -2,7 +2,7 @@ import datetime
 import random
 import pandas as pd
 
-def generate_feedbacks_csv():
+def generate_feedbacks_csv(save_csv=True):
     # Define the input and output CSV file paths
     input_rating_csv_file_path = "ratings.csv"
     input_click_csv_file_path = 'to_read.csv'
@@ -68,11 +68,13 @@ def generate_feedbacks_csv():
     df_clicks["action"] = actions
     df_clicks["timestamp"] = timestamps
 
-    print("writing to csv..")
-
     stacked_df = pd.concat([df_ratings, df_clicks], axis=0)
-    stacked_df.to_csv(output_csv_file_path, index=False)
-
+    
+    if save_csv:
+        print("writing to csv..")
+        stacked_df.to_csv(output_csv_file_path, index=False)
+    
+    return stacked_df
 
 if __name__ == "__main__":
     generate_feedbacks_csv()
