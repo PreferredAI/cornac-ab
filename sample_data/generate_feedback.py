@@ -1,5 +1,3 @@
-# import csv
-# import uuid
 import datetime
 import random
 import pandas as pd
@@ -78,78 +76,6 @@ def generate_feedbacks_csv():
 
 if __name__ == "__main__":
     generate_feedbacks_csv()
-
-# with open(input_rating_csv_file_path, 'r') as input_csv_file:
-#     reader = csv.reader(input_csv_file)
-#     next(reader)  # Skip the header row
-#     for row in reader:
-#         feedback_id = uuid.uuid4()
-#         recommendation_id = uuid.uuid4()
-#         user_id = row[0]
-#         book_id = row[1]
-#         rating = row[2]
-#         rating_feedbacks.append({
-#             "id": feedback_id,
-#             "recommendation_id": recommendation_id,
-#             "user_id" : user_id,
-#             "item_id" : book_id,
-#             "rating": rating,
-#             "action": "rating"
-#         })
-
-# num_days = 180
-# date_base = datetime.datetime.today() - datetime.timedelta(days=365)
-
-# # D-365 ~ D-185
-# date_list = [ date_base + random.random() * datetime.timedelta(days = num_days) for _ in range(len(rating_feedbacks)) ]
-# date_list.sort()
-
-# for i in range(len(rating_feedbacks)):
-#     rating_feedbacks[i]['timestamp'] = date_list[i]
-
-
-# with open(input_click_csv_file_path, 'r') as input_csv_file:
-#     reader = csv.reader(input_csv_file)
-#     next(reader)  # Skip the header row
-#     for row in reader:
-#         feedback_id = uuid.uuid4()
-#         recommendation_id = uuid.uuid4()
-#         user_id = row[0]
-#         book_id = row[1]
-#         click_feedbacks.append({
-#             "id": feedback_id,
-#             "recommendation_id": recommendation_id,
-#             "user_id" : user_id,
-#             "item_id" : book_id,
-#             "rating": 1,
-#             "action": "click"
-#         })
-
-# # add timestamps
-# num_days = 180
-# date_base = datetime.datetime.today() - datetime.timedelta(days=num_days)
-
-# # D-180 ~ D-0
-# date_list = [ date_base + random.random() * datetime.timedelta(days = num_days) for _ in range(len(click_feedbacks)) ]
-# date_list.sort()
-
-# for i in range(len(click_feedbacks)):
-#     click_feedbacks[i]['timestamp'] = date_list[i]
-    
-# # Write the feedbacks into the output CSV file
-# with open(output_csv_file_path, 'w', newline='') as output_csv_file:
-#     writer = csv.writer(output_csv_file)
-#     writer.writerow(['id', 'recommendation_id', 'user_id', 'item_id', 'rating', 'timestamp', 'action'])  # Write the header row
-#     for feedback in rating_feedbacks + click_feedbacks:
-#         writer.writerow([
-#             feedback['id'],
-#             feedback['recommendation_id'],
-#             feedback['user_id'],
-#             feedback['item_id'],
-#             feedback['rating'],
-#             feedback['timestamp'],
-#             feedback['action']
-#         ])
 
 
 

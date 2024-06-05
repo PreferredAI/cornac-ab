@@ -1,9 +1,6 @@
-# import csv
 import random
 import datetime
-# import uuid
 import pandas as pd
-# from dateutil import parser
 
 def random_timestamp_before(timestamp):
     return timestamp - random.random() * datetime.timedelta(minutes=2)
@@ -79,60 +76,5 @@ def generate_recommendations_csv():
 
 if __name__ == "__main__":
     generate_recommendations_csv()
-# # Create recommendations
-# recommendations = []
-
-# with open(input_csv_file_path, 'r') as input_csv_file:
-#     reader = csv.reader(input_csv_file)
-#     next(reader)  # Skip the header row
-#     for row in reader:
-#         feedback_id = row[0]
-#         recommendation_id = row[1]
-#         user_id = row[2]
-#         book_id = row[3]
-#         rating = int(row[4])
-#         timestamp = parser.parse(row[5])
-
-#         item_ids = popular_books.copy()
-#         if book_id not in item_ids:
-#             # replace random item from the list
-#             random_index = random.randint(0, len(item_ids) - 1)
-#             item_ids[random_index] = book_id
-        
-#         rec_timestamp = timestamp - random.random() * datetime.timedelta(minutes=2)
-
-#         recommendations.append({
-#             "id": recommendation_id,
-#             "user_id" : user_id,
-#             "rec_ids": item_ids,
-#             "timestamp": rec_timestamp
-#         })
-
-# # add additional recommendations
-# num_additional_recommendations = 1000000
-
-# for i in range(num_additional_recommendations):
-#     recommendation_id = uuid.uuid4()
-#     user_id = random.randint(1, 53424)
-#     item_ids = popular_books.copy()
-    
-#     rec_timestamp = datetime.datetime.today() - random.random() * datetime.timedelta(days = 365)
-
-#     recommendations.append({
-#         "id": recommendation_id,
-#         "user_id" : user_id,
-#         "rec_ids": item_ids,
-#         "timestamp": rec_timestamp
-#     })
-
-# # Write the feedbacks into the output CSV file
-# with open(output_csv_file_path, 'w', newline='') as output_csv_file:
-#     writer = csv.writer(output_csv_file)
-#     writer.writerow(['id', 'user_id', 'rec_ids', 'timestamp'])  # Write the header row
-#     for recommendation in recommendations:
-#         writer.writerow([recommendation['id'], recommendation['user_id'], recommendation['rec_ids'], recommendation['timestamp']])
-
-
-
 
 

@@ -2,7 +2,6 @@ from opensearchpy import OpenSearch
 from opensearchpy.helpers import bulk, parallel_bulk
 import csv
 import os
-from dateutil import parser
 import pandas as pd
 
 host = os.environ.get("OPENSEARCH_HOST", "localhost")
@@ -58,14 +57,6 @@ def bulk_insert_data(index_name, data):
             "_source": item,
         }
         for item in data]
-    # for item in data:
-    #     action = {
-    #         "_op_type": "index",
-    #         "_index": index_name,
-    #         "_id": item["id"],
-    #         "_source": item,
-    #     }
-    #     actions.append(action)
     print("> Inserting bulk data into OpenSearch...")
     response = bulk(es, actions)  # Perform bulk insert operation
 
@@ -85,29 +76,7 @@ def read_recommendations():
     df["user_id"] = df["user_id"].apply(lambda x: str(x))
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     
-    data = df.to_dict(orient="records")
-    
-    # data = []
-    # with open(file_path, "r") as f:
-    #     reader = csv.reader(f)
-    #     next(reader)
-    #     for row in reader:
-    #         rec_ids = row[2].replace('\'', '"')
-    #         rec_ids = json.loads(rec_ids)
-
-    #         model_idx = int(row[1]) % len(model_list)
-    #         model = model_list[model_idx]
-
-    #         data.append({
-    #             "id": row[0],
-    #             "user_id": row[1],
-    #             "rec_ids": rec_ids,
-    #             "model": model,
-    #             "timestamp": parser.parse(row[3]),
-    #             "experiment_id": 1
-    #         })
-
-    return data
+    return df.to_dict(orient="records")
 
 def read_feedback():
     file_path = "feedbacks.csv"
@@ -122,31 +91,9 @@ def read_feedback():
     df["recommendation_id"] = df["recommendation_id"].apply(lambda x: str(x))
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     
-    data = df.to_dict(orient="records")
-    # data = []
-    # with open(file_path, "r") as f:
-    #     reader = csv.reader(f)
-    #     next(reader)
-    #     for row in reader:
-    #         model_idx = int(row[2]) % len(model_list)
-    #         model = model_list[model_idx]
-
-    #         data.append({
-    #             "id": row[0],
-    #             "experiment_id": 1,
-    #             "recommendation_id": row[1],
-    #             "user_id": row[2],
-    #             "item_id": row[3],
-    #             "rating": int(row[4]),
-    #             "model": model,
-    #             "timestamp": parser.parse(row[5])
-    #         })
-
-    return data
+    return df.to_dict(orient="records")
 
 def read_users():
-    # file_path = "users.csv"
-
     data = [ { "id": str(i), "userId": str(i) } for i in range(1, 53424)]
     return data
 
