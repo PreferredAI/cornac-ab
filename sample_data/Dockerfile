@@ -9,4 +9,4 @@ RUN pip install --no-cache-dir pandas opensearch-py
 COPY ./ /app/
 
 # Run the Python script
-CMD ["python", "insert_sample_data.py"]
+CMD ["python", "-u", "insert_sample_data.py"]
