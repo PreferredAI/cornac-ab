@@ -76,7 +76,7 @@ services:
       - opensearch-net
 
   data-init:
-    image: ghcr.io/preferredai/cornac-ab-sample-data:0.9
+    image: ghcr.io/preferredai/cornac-ab-sample-data:0.9.1
     container_name: data-init
     restart: on-failure
     environment:
