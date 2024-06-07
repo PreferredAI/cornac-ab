@@ -2,7 +2,6 @@ from opensearchpy import OpenSearch
 from opensearchpy.helpers import bulk, parallel_bulk
 import csv
 import os
-from dateutil import parser
 import pandas as pd
 
 host = os.environ.get("OPENSEARCH_HOST", "localhost")
@@ -58,14 +57,6 @@ def bulk_insert_data(index_name, data):
             "_source": item,
         }
         for item in data]
-    # for item in data:
-    #     action = {
-    #         "_op_type": "index",
-    #         "_index": index_name,
-    #         "_id": item["id"],
-    #         "_source": item,
-    #     }
-    #     actions.append(action)
     print("> Inserting bulk data into OpenSearch...")
     response = bulk(es, actions)  # Perform bulk insert operation
 
@@ -74,45 +65,23 @@ def bulk_insert_data(index_name, data):
 def str_to_array(s):
     return s[1:-1].split(', ')
 
-def read_recommendations():
-    file_path = "recommendations.csv"
-
-    df = pd.read_csv(file_path)
+def read_recommendations(df):    
+    if df is None:
+        file_path = "recommendations.csv"
+        df = pd.read_csv(file_path)
+        df["rec_ids"] = df["rec_ids"].apply(str_to_array)
     
-    df["rec_ids"] = df["rec_ids"].apply(str_to_array)
     df["experiment_id"] = [1] * len(df)
     df["model"] = df["user_id"].apply(lambda x: model_list[int(x) % len(model_list)])
     df["user_id"] = df["user_id"].apply(lambda x: str(x))
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     
-    data = df.to_dict(orient="records")
-    
-    # data = []
-    # with open(file_path, "r") as f:
-    #     reader = csv.reader(f)
-    #     next(reader)
-    #     for row in reader:
-    #         rec_ids = row[2].replace('\'', '"')
-    #         rec_ids = json.loads(rec_ids)
+    return df.to_dict(orient="records")
 
-    #         model_idx = int(row[1]) % len(model_list)
-    #         model = model_list[model_idx]
-
-    #         data.append({
-    #             "id": row[0],
-    #             "user_id": row[1],
-    #             "rec_ids": rec_ids,
-    #             "model": model,
-    #             "timestamp": parser.parse(row[3]),
-    #             "experiment_id": 1
-    #         })
-
-    return data
-
-def read_feedback():
-    file_path = "feedbacks.csv"
-
-    df = pd.read_csv(file_path)
+def read_feedback(df):
+    if df is None:
+        file_path = "feedbacks.csv"
+        df = pd.read_csv(file_path)
     
     df["experiment_id"] = [1] * len(df)
     df["rating"] = df["rating"].apply(lambda x: int(x))
@@ -122,31 +91,9 @@ def read_feedback():
     df["recommendation_id"] = df["recommendation_id"].apply(lambda x: str(x))
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     
-    data = df.to_dict(orient="records")
-    # data = []
-    # with open(file_path, "r") as f:
-    #     reader = csv.reader(f)
-    #     next(reader)
-    #     for row in reader:
-    #         model_idx = int(row[2]) % len(model_list)
-    #         model = model_list[model_idx]
-
-    #         data.append({
-    #             "id": row[0],
-    #             "experiment_id": 1,
-    #             "recommendation_id": row[1],
-    #             "user_id": row[2],
-    #             "item_id": row[3],
-    #             "rating": int(row[4]),
-    #             "model": model,
-    #             "timestamp": parser.parse(row[5])
-    #         })
-
-    return data
+    return df.to_dict(orient="records")
 
 def read_users():
-    # file_path = "users.csv"
-
     data = [ { "id": str(i), "userId": str(i) } for i in range(1, 53424)]
     return data
 
@@ -174,16 +121,22 @@ def read_items():
 
     return data
 
-def add_to_opensearch():
+def add_to_opensearch(df_recommendations = None, df_feedbacks = None):
     print("reading recommendations...")
-    rec_data = read_recommendations()
+    rec_data = read_recommendations(df_recommendations)
     print("inserting recommendations data...")
-    bulk_insert_data_parallel("recommendations", rec_data)
+    for i in range(0, len(rec_data), 500000):
+        print(f"Inserting {i} to {i+500000} records")
+        bulk_insert_data_parallel("recommendations", rec_data[i:i+500000])
+    # bulk_insert_data_parallel("recommendations", rec_data)
     
     print("reading feedbacks...")
-    feedback_data = read_feedback()
+    feedback_data = read_feedback(df_feedbacks)
     print("inserting feedbacks data...")
-    bulk_insert_data_parallel("feedback", feedback_data)
+    for i in range(0, len(feedback_data), 500000):
+        print(f"Inserting {i} to {i+500000} records")
+        bulk_insert_data_parallel("feedback", feedback_data[i:i+500000])
+    # bulk_insert_data_parallel("feedback", feedback_data)
     
     print("reading users...")
     user_data = read_users()
