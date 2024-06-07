@@ -16,16 +16,15 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class ExperimentService {
@@ -52,6 +51,8 @@ public class ExperimentService {
     public List<Experiment> getExperiments(){
         return experimentRepository.findAll();
     }
+
+    private final List<String> DEPLOYING_MODELS = Collections.synchronizedList(new ArrayList<>());
 
     public Experiment getExperiment(String id){
         return experimentRepository.findById(Integer.parseInt(id))
@@ -83,14 +84,25 @@ public class ExperimentService {
     }
 
     @Transactional
-    public Experiment createNewExperiment(Long userSeed, List<String> modelName, List<MultipartFile> file) {
+    public Experiment createNewExperiment(Long userSeed, List<String> modelNames, List<MultipartFile> files) {
         // 1. First create and save experiment instance
         Experiment experiment = saveExperiment(userSeed);
 
+        ExecutorService executorService = Executors.newFixedThreadPool(4); // concurrent model loading
+
         // 2. Create cornac instances for each model uploaded
-        for (int i = 0; i < modelName.size(); i++) {
-            cornacService.createCornacInstance(modelName.get(i), experiment.getId(), file.get(i));
+        for (int i = 0; i < modelNames.size(); i++) {
+            String modelName = modelNames.get(i);
+            MultipartFile file = files.get(i);
+
+            executorService.submit(() -> {
+                LOGGER.info("Starting Cornac instance for model: {}", modelName);
+                DEPLOYING_MODELS.add(modelName);
+
+                cornacService.createCornacInstance(modelName, experiment.getId(), file, DEPLOYING_MODELS);
+            });
         }
+
         // 3. Allocate users into instances and start the experiment
         cornacService.allocateUsersToInstances(experiment);
 
@@ -118,24 +130,32 @@ public class ExperimentService {
                 cornacInstanceRepository.findCornacInstanceByExperimentId(experiment.getId());
 
         if (experiment.getCornacInstances() == null) {
-            LOGGER.info("There are no running cornac instances.");
+            LOGGER.info("There are no expected cornac instances.");
             return;
         } else {
-            LOGGER.info("There are {} running cornac instances.", cornacInstances.size());
+            LOGGER.info("There are {} expected cornac instances. Currently deploying models: {}", cornacInstances.size(), DEPLOYING_MODELS);
         }
 
+        ExecutorService executorService = Executors.newFixedThreadPool(4); // concurrent model checking/loading
+
         for (CornacInstance cornacInstance : cornacInstances) {
+            executorService.submit(() -> {
+                if (!cornacService.isInstanceStillAlive(cornacInstance)) {
+                    String serviceName = cornacInstance.getServiceName();
 
-            if (!cornacService.isInstanceStillAlive(cornacInstance)) {
-                // kill the local instance, and restart it.
-                cornacService.removeInMemoryCornacInstance(cornacInstance);
+                    if (DEPLOYING_MODELS.contains(serviceName)){
+                        LOGGER.info("Still attempting restart for {}", serviceName);
+                    } else {
+                        DEPLOYING_MODELS.add(serviceName);
+                        // kill the local instance, and restart it.
+                        cornacService.removeInMemoryCornacInstance(cornacInstance);
 
-                LOGGER.info("Restarting Cornac instance {}", cornacInstance.getServiceName());
+                        LOGGER.info("Restarting Cornac instance {}", serviceName);
 
-                cornacService.startCornacInstance(cornacInstance.getServiceName(), experiment, true);
-
-                return;
-            }
+                        cornacService.startCornacInstance(serviceName, experiment, true, DEPLOYING_MODELS);
+                    }
+                }
+            });
         }
     }
 

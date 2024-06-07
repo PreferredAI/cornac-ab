@@ -67,7 +67,7 @@ public class CornacService {
     private CornacProperties cornacProperties;
 
     @Transactional
-    public CornacInstanceDto createCornacInstance(String name, Integer experimentId, MultipartFile file) {
+    public CornacInstanceDto createCornacInstance(String name, Integer experimentId, MultipartFile file, List<String> deployingModels) {
 
         // Do OS Checks
         boolean isWindows = System.getProperty("os.name")
@@ -91,14 +91,11 @@ public class CornacService {
             );
         }
 
-//        storeFileInTemp(file, name);
-//        unzipFile(cornacProperties.getUploadDir() + "/" + name + "/file.zip", "uploads/" + name + "/output/", true);
-
-        return startCornacInstance(name, experiment, false);
+        return startCornacInstance(name, experiment, false, deployingModels);
     }
 
     @Transactional
-    public CornacInstanceDto startCornacInstance(String name, Experiment experiment, boolean isRestart) {
+    public CornacInstanceDto startCornacInstance(String name, Experiment experiment, boolean isRestart, List<String> deployingModels) {
 
         boolean isWindows = System.getProperty("os.name")
                 .toLowerCase()
@@ -150,13 +147,16 @@ public class CornacService {
 //                List<String> outputs = readOutput(process.getInputStream());
 //                outputs.forEach(output -> LOGGER.info("output> " + output));
 
+                deployingModels.remove(name); // update status that it is no longer trying to deploy
+
                 throw new ErrorResponseException(HttpStatus.BAD_REQUEST,
                         new RuntimeException("Unable to start service. Please try again.")
                 );
             } else {
                 LOGGER.info("Service started at port: {}", port);
-
                 CornacInstance cornacInstance = addCornacInstance(name, modelClass, port, experiment, process, isRestart);
+                deployingModels.remove(name); // update status that model has been deployed
+
                 return new CornacInstanceDto(cornacInstance.getServiceName(), cornacInstance.getPort(), "Running" );
             }
 
