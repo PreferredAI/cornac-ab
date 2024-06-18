@@ -39,12 +39,8 @@ public class ExperimentController {
 
     @RequestMapping(value = "/", method = RequestMethod.POST)
     public Experiment createNewExperiment(
-//                                            @RequestParam(name = "type") ExperimentType type,
-//                                          @RequestParam(name = "startDateTime") Date startDateTime,
-//                                          @RequestParam(name = "endDateTime") Date endDateTime,
                                           @RequestParam(name = "userSeed", defaultValue = "123") Long userSeed,
                                           @RequestParam(name = "name", defaultValue = "model") List<String> modelName,
-//                                          @RequestParam(name = "modelClass") List<String> modelClass,
                                           @RequestParam("file") List<MultipartFile> file) {
         return experimentService.createNewExperiment(userSeed, modelName, file);
     }

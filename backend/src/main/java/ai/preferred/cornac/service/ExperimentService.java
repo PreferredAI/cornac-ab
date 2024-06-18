@@ -75,6 +75,15 @@ public class ExperimentService {
         return experimentRepository.findFirstByEndDateTimeIsNull();
     }
 
+    public List<Experiment> endAllCurrentExperiments() {
+        List<Experiment> experiments = experimentRepository.findAllByEndDateTimeIsNull();
+        experiments.forEach(experiment -> {
+            experiment.setEndDateTime(new Timestamp(new Date().getTime()));
+            experimentRepository.save(experiment);
+        });
+        return experiments;
+    }
+
     public List<CornacInstanceDto> getCornacInstances() {
         Experiment experiment = getCurrentExperiment();
         if (experiment == null) {
@@ -85,8 +94,13 @@ public class ExperimentService {
 
     @Transactional
     public Experiment createNewExperiment(Long userSeed, List<String> modelNames, List<MultipartFile> files) {
-        // 1. First create and save experiment instance
+        // 1. First end all other experiments, if it still currently running.
+        List<Experiment> endedExperiments = endAllCurrentExperiments();
+        LOGGER.info("Ended {} running experiments", endedExperiments.size());
+
+        // 2. Create and save new experiment instance
         Experiment experiment = saveExperiment(userSeed);
+        LOGGER.info("Created new experiment with ID: {}", experiment.getId());
 
         ExecutorService executorService = Executors.newFixedThreadPool(4); // concurrent model loading
 
